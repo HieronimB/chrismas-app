@@ -17,7 +17,7 @@
     },
     "license": "MIT",
     "devDependencies": {
-        "webpack-dev-server": "^3.1.9",
+        "webpack-dev-server": "^3.1.9"
     },
     "dependencies": {
         "purecss": "^1.0.0",
