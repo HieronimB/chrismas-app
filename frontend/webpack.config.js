@@ -18,8 +18,8 @@ var common = {
     mode: MODE,
     entry: "./src/index.js",
     output: {
-        path: path.join(__dirname, "dist/assets"),
-        publicPath: "/assets",
+        path: path.join(__dirname, "dist"),
+        publicPath: "/",
         // webpack -p automatically adds hash when building for production
         filename: filename
     },
@@ -27,7 +27,6 @@ var common = {
         new HTMLWebpackPlugin({
             // Use this template to get basic responsive meta tags
             template: "src/index.html",
-            filename: "../index.html",
             // inject details of output file at end of body
             inject: "body"
         })

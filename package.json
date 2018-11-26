@@ -1,0 +1,8 @@
+{
+  "name": "chrismas-app",
+  "version": "1.0.0",
+  "scripts": {
+    "postinstall": "npm install --prefix frontend && npm run prod --prefix frontend"
+  },
+  "cacheDirectories": ["frontend/node_modules"]
+}
