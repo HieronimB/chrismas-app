@@ -6,7 +6,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http exposing (Error(..))
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (Decoder, field, map2, string)
 
 
 
@@ -27,12 +27,14 @@ port toJs : String -> Cmd msg
 type alias Model =
     { counter : Int
     , serverMessage : String
+    , firstname: String
+    , lastname: String
     }
 
 
 init : Int -> ( Model, Cmd Msg )
 init flags =
-    ( { counter = flags, serverMessage = "" }, Cmd.none )
+    ( { counter = flags, serverMessage = "", firstname = "", lastname = "" }, Cmd.none )
 
 
 
@@ -45,8 +47,12 @@ type Msg
     = Inc
     | Set Int
     | TestServer
-    | OnServerResponse (Result Http.Error String)
+    | Draw
+    | Firstname String
+    | Lastname String
+    | OnServerResponse (Result Http.Error Friend)
 
+type alias Friend = { firstname: String, lastname: String }
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
@@ -58,19 +64,34 @@ update message model =
             ( { model | counter = m }, toJs "Hello Js" )
 
         TestServer ->
-            ( model
-            , Http.get "/test" (Decode.field "result" Decode.string)
-                |> Http.send OnServerResponse
-            )
+            ( model, Cmd.none)
 
         OnServerResponse res ->
             case res of
                 Ok r ->
-                    ( { model | serverMessage = r }, Cmd.none )
+                    ( { model | serverMessage = r.firstname ++ " " ++ r.lastname }, Cmd.none )
 
                 Err err ->
                     ( { model | serverMessage = "Error: " ++ httpErrorToString err }, Cmd.none )
 
+        Draw ->
+            (model, Http.get (drawUrl model) friendDecoder |> Http.send OnServerResponse)
+        Firstname name ->
+            ({ model | firstname = name}, Cmd.none)
+        Lastname name ->
+            ({ model | lastname = name }, Cmd.none)
+
+drawUrl : Model -> String
+drawUrl model = "/api/draw?firstname=" ++ model.firstname ++ "&lastname=" ++ model.lastname
+
+decodeFirstname : Decoder String
+decodeFirstname = field "firstname" string
+
+decodeLastname : Decoder String
+decodeLastname = field "lastname" string
+
+friendDecoder : Decoder Friend
+friendDecoder = map2 Friend decodeFirstname decodeLastname
 
 httpErrorToString : Http.Error -> String
 httpErrorToString err =
@@ -125,7 +146,15 @@ view model =
                     [ text "+ 1" ]
                 , text <| String.fromInt model.counter
                 ]
-            , div [ class "pure-u-1-3" ] []
+            , div [ class "pure-u-1-3" ]
+                [ button
+                    [ class "pure-button pure-button-primary"
+                    , onClick Draw
+                    ]
+                    [ text "Losuj przyjaciela" ]
+                , input [ type_ "text", placeholder "Imie", value model.firstname, onInput Firstname ] []
+                , input [ type_ "text", placeholder "Nazwisko", value model.lastname, onInput Lastname ] []
+                ]
             , div [ class "pure-u-1-3" ]
                 [ button
                     [ class "pure-button pure-button-primary"
