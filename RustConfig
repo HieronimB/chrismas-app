@@ -1,2 +1,3 @@
 RUST_INSTALL_DIESEL=1
 BUILD_PATH=backend/
+DIESEL_FLAGS="--no-default-features --features postgres"
