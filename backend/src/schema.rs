@@ -6,6 +6,13 @@ table! {
 }
 
 table! {
+    drawn_excluded (friend, excluded) {
+        friend -> Int4,
+        excluded -> Int4,
+    }
+}
+
+table! {
     flyway_schema_history (installed_rank) {
         installed_rank -> Int4,
         version -> Nullable<Varchar>,
@@ -31,6 +38,7 @@ table! {
 
 allow_tables_to_appear_in_same_query!(
     draw_result,
+    drawn_excluded,
     flyway_schema_history,
     friends,
 );

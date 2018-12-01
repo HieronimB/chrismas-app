@@ -1,7 +1,7 @@
 @import '~purecss/build/pure.css';
 
 body {
-    background-color: #ddd;
+    background-color: #6b92b9;
     margin-top: 20px;
 }
 .container {
@@ -16,15 +16,59 @@ header {
         width: 60px;
         margin-right: 30px;
     }
+    .title {
+        font-size: xx-large;
+    }
+
+    padding-left: 10%;
 }
 
 button {
     margin-right: 15px;
 }
 
+.description {
+    font-weight: bold;
+    color: #e9322d;
+    font-size: x-large;
+    text-align: center;
+}
+
 .logo {
-    background: url('images/logo.png');
+    background: url('images/logo.gif');
     width: 60px;
     height: 60px;
     background-size: cover;
+}
+
+#snowflakeContainer {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+.snowflake {
+    padding-left: 15px;
+    font-family: Cambria, Georgia, serif;
+    font-size: 14px;
+    line-height: 24px;
+    position: fixed;
+    color: #FFFFFF;
+    user-select: none;
+    z-index: 1000;
+}
+.snowflake:hover {
+    cursor: default;
+}
+
+.button-div {
+    margin-left: 20%;
+}
+
+.server-message {
+    font-size: x-large;
+}
+
+.drawn-friend {
+    font-size: x-large;
+    text-align: center;
 }

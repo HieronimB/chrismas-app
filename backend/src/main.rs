@@ -37,17 +37,42 @@ pub struct HttpFriend {
 }
 
 fn draw(friend_param: Query<HttpFriend>) -> Result<Json<HttpFriend>> {
-    let friend = db::fetch_friend(&friend_param.firstname, &friend_param.lastname);
+    let db_connection = db::establish_connection();
+    let friend = db::fetch_friend(&friend_param.firstname.to_lowercase(),
+                                                     &friend_param.lastname.to_lowercase(),
+                                                        &db_connection);
 
     friend
         .and_then(|f| {
-            let drawn = db::fetch_drawn(&f);
+            let drawn = db::fetch_drawn(&f, &db_connection);
             drawn.or_else(|_| {
-                let mut rng = rand::thread_rng();
-                let friends = db::fetch_friends(&f);
-                let drawn = &friends[rng.gen_range(0, friends.len())];
-                db::insert_drawn(&f, drawn);
-                Ok(Friend {id: drawn.id, firstname: drawn.firstname.clone(), lastname: drawn.lastname.clone() })
+                let mut friends = db::fetch_friends(&f, &db_connection);
+                let drawn = if db::fetch_number(&db_connection) == 3 {
+                    let mut vec = db::is_excluded(&f, &db_connection).unwrap();
+                    if vec.len() > 0 {
+                        vec.remove(0)
+                    } else {
+                        let mut rng = rand::thread_rng();
+                        let len = friends.len();
+                        friends.remove(rng.gen_range(0, len))
+                    }
+                } else if db::fetch_number(&db_connection) == 2 {
+                    let mut vec = db::is_excluded(&f, &db_connection).unwrap();
+                    if vec.len() > 0 {
+                        vec.remove(0)
+                    } else {
+                        let mut rng = rand::thread_rng();
+                        let len = friends.len();
+                        friends.remove(rng.gen_range(0, len))
+                    }
+                } else {
+                    let mut rng = rand::thread_rng();
+                    let len = friends.len();
+                    friends.remove(rng.gen_range(0, len))
+                };
+
+                db::insert_drawn(&f, &drawn, &db_connection);
+                Ok(Friend { id: drawn.id, firstname: drawn.firstname.clone(), lastname: drawn.lastname.clone() })
             })
         })
         .map(|f| Json(HttpFriend { firstname: f.firstname, lastname: f.lastname }))

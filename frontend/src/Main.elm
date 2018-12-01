@@ -7,6 +7,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http exposing (Error(..))
 import Json.Decode as Decode exposing (Decoder, field, map2, string)
+import String exposing (left, dropLeft, toUpper)
 
 
 
@@ -29,12 +30,13 @@ type alias Model =
     , serverMessage : String
     , firstname: String
     , lastname: String
+    , drawnFriend: String
     }
 
 
 init : Int -> ( Model, Cmd Msg )
 init flags =
-    ( { counter = flags, serverMessage = "", firstname = "", lastname = "" }, Cmd.none )
+    ( { counter = 5, serverMessage = "", firstname = "", lastname = "", drawnFriend = "" }, Cmd.none )
 
 
 
@@ -69,10 +71,10 @@ update message model =
         OnServerResponse res ->
             case res of
                 Ok r ->
-                    ( { model | serverMessage = r.firstname ++ " " ++ r.lastname }, Cmd.none )
+                    ( { model | drawnFriend = (capitalize r.firstname) ++ " " ++ (capitalize r.lastname), serverMessage = "" }, Cmd.none )
 
                 Err err ->
-                    ( { model | serverMessage = "Error: " ++ httpErrorToString err }, Cmd.none )
+                    ( { model | serverMessage = "Przepraszam, ale nie wiem kim jesteś " ++ (capitalize model.firstname) ++ " " ++ (capitalize model.lastname) ++ " :( Czy na pewno wpisałeś poprawne imie i nazwisko ?" }, Cmd.none )
 
         Draw ->
             (model, Http.get (drawUrl model) friendDecoder |> Http.send OnServerResponse)
@@ -131,47 +133,46 @@ add1 model =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ header []
-            [ -- img [ src "/images/logo.png" ] []
+        [ div [ id "snowflakeContainer" ] [ p [ class "snowflake" ] [text "*"] ],
+        header []
+            [ -- img [ src "/images/logo.gif" ] []
               span [ class "logo" ] []
-            , h1 [] [ text "Elm 0.19 Webpack Starter, with hot-reloading" ]
+            , h1 [ class "title" ] [ text "Losowanie prezentów - Wigilia 2018" ]
             ]
-        , p [] [ text "Click on the button below to increment the state." ]
+        , p [ class "description" ] [ text "Wpisz swoje imie i nazwisko a następnie kiknij 'Losuj', aby wylosować osobę, którą uszczęśliwisz prezetem :)" ]
         , div [ class "pure-g" ]
             [ div [ class "pure-u-1-3" ]
-                [ button
-                    [ class "pure-button pure-button-primary"
-                    , onClick Inc
-                    ]
-                    [ text "+ 1" ]
-                , text <| String.fromInt model.counter
-                ]
+                []
+            , if String.isEmpty model.drawnFriend
+                then drawnView model else afterDrawnView model
             , div [ class "pure-u-1-3" ]
-                [ button
-                    [ class "pure-button pure-button-primary"
-                    , onClick Draw
-                    ]
-                    [ text "Losuj przyjaciela" ]
-                , input [ type_ "text", placeholder "Imie", value model.firstname, onInput Firstname ] []
-                , input [ type_ "text", placeholder "Nazwisko", value model.lastname, onInput Lastname ] []
-                ]
-            , div [ class "pure-u-1-3" ]
-                [ button
-                    [ class "pure-button pure-button-primary"
-                    , onClick TestServer
-                    ]
-                    [ text "ping dev server" ]
-                , text model.serverMessage
-                ]
+                []
             ]
-        , p [] [ text "Then make a change to the source code and see how the state is retained after you recompile." ]
+        , p [ class "server-message" ] [ text model.serverMessage ]
         , p []
-            [ text "And now don't forget to add a star to the Github repo "
-            , a [ href "https://github.com/simonh1000/elm-webpack-starter" ] [ text "elm-webpack-starter" ]
-            ]
+            []
         ]
 
+drawnView : Model -> Html Msg
+drawnView model = div [ class "pure-u-1-3" ]
+                            [   input [ type_ "text", placeholder "Imie", value model.firstname, onInput Firstname ] []
+                                , input [ type_ "text", placeholder "Nazwisko", value model.lastname, onInput Lastname ] []
+                                ,div [ class "button-div" ] [ button
+                                            [ class "pure-button pure-button-primary btn-draw"
+                                                , onClick Draw
+                                            ]
+                                            [ text "Losuj" ]
+                                        ]
+                            ]
 
+afterDrawnView : Model -> Html Msg
+afterDrawnView model = div [ class "pure-u-1-3" ]
+                             [ p [ class "drawn-friend" ] [ text ("Gratujace wylosowałeś: " ++ model.drawnFriend) ] ]
+
+
+capitalize : String -> String
+capitalize str =
+  (left 1 >> toUpper) str ++ dropLeft 1 str
 
 -- ---------------------------
 -- MAIN
@@ -185,7 +186,7 @@ main =
         , update = update
         , view =
             \m ->
-                { title = "Elm 0.19 starter"
+                { title = "Losowanie prezentów"
                 , body = [ view m ]
                 }
         , subscriptions = \_ -> Sub.none
