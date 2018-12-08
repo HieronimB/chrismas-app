@@ -16,7 +16,7 @@ use actix_web::error::ErrorNotFound;
 use rand::Rng;
 use actix_web::error::ErrorInternalServerError;
 use core::borrow::Borrow;
-use db::Friend;
+use crate::db::Friend;
 
 mod schema;
 mod db;
