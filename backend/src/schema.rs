@@ -36,9 +36,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    draw_result,
-    drawn_excluded,
-    flyway_schema_history,
-    friends,
-);
+allow_tables_to_appear_in_same_query!(draw_result, drawn_excluded, flyway_schema_history, friends,);
