@@ -15,6 +15,7 @@ pub struct BacktrackingAlgorithm {
     drawn_excluded: Vec<(i32, i32)>,
 }
 
+//TODO Replace println with proper logging
 impl BacktrackingAlgorithm {
     pub fn new(to_draw: Vec<i32>, not_drawn: Vec<i32>, drawn_excluded: Vec<(i32, i32)>) -> BacktrackingAlgorithm {
         BacktrackingAlgorithm {

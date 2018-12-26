@@ -7,8 +7,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http exposing (Error(..))
 import Json.Decode as Decode exposing (Decoder, field, map2, string)
+import Route exposing (Route)
 import String exposing (left, dropLeft, toUpper)
-
+import Url
 
 
 -- ---------------------------
@@ -31,13 +32,23 @@ type alias Model =
     , firstname: String
     , lastname: String
     , drawnFriend: String
+    , key : Nav.Key
+    , url : Url.Url
+    , route : Route
     }
 
 
-init : Int -> ( Model, Cmd Msg )
-init flags =
-    ( { counter = 5, serverMessage = "", firstname = "", lastname = "", drawnFriend = "" }, Cmd.none )
-
+init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
+    ( { counter = 5
+        , serverMessage = ""
+        , firstname = ""
+        , lastname = ""
+        , drawnFriend = ""
+        , key = key
+        , url = url
+        , route = Route.parseUrl url
+      }, Cmd.none )
 
 
 -- ---------------------------
@@ -53,6 +64,8 @@ type Msg
     | Firstname String
     | Lastname String
     | OnServerResponse (Result Http.Error Friend)
+    | LinkClicked Browser.UrlRequest
+    | UrlChanged Url.Url
 
 type alias Friend = { firstname: String, lastname: String }
 
@@ -82,6 +95,16 @@ update message model =
             ({ model | firstname = name}, Cmd.none)
         Lastname name ->
             ({ model | lastname = name }, Cmd.none)
+        LinkClicked urlRequest ->
+              case urlRequest of
+                Browser.Internal url ->
+                  ( model, Nav.pushUrl model.key (Url.toString url) )
+                Browser.External href ->
+                  ( model, Nav.load href )
+        UrlChanged url ->
+              ( { model | url = url, route = Route.parseUrl url }
+              , Cmd.none
+              )
 
 drawUrl : Model -> String
 drawUrl model = "/api/draw?firstname=" ++ model.firstname ++ "&lastname=" ++ model.lastname
@@ -132,26 +155,34 @@ add1 model =
 
 view : Model -> Html Msg
 view model =
+    case model.route of
+        Route.Home -> homeView model
+        Route.NewDraw -> div [ class "container" ] [ p [] [ text (Route.toString model.route) ] ]
+        Route.NotFoundRoute -> div [ class "container" ] [ p [] [ text (Route.toString model.route) ] ]
+
+
+
+homeView : Model -> Html Msg
+homeView model =
     div [ class "container" ]
-        [ div [ id "snowflakeContainer" ] [ p [ class "snowflake" ] [text "*"] ],
-        header []
-            [ -- img [ src "/images/logo.gif" ] []
-              span [ class "logo" ] []
-            , h1 [ class "title" ] [ text "Losowanie prezentów - Wigilia 2018" ]
+            [ div [ id "snowflakeContainer" ] [ p [ class "snowflake" ] [text "*"] ],
+            header []
+                [ -- img [ src "/images/logo.gif" ] []
+                  span [ class "logo" ] []
+                , h1 [ class "title" ] [ text "Losowanie prezentów - Wigilia 2018" ]
+                ]
+            , p [ class "description" ] [ text "Wpisz swoje imie i nazwisko a następnie kiknij 'Losuj', aby wylosować osobę, którą uszczęśliwisz prezetem :)" ]
+            , div [ class "pure-g" ]
+                [ div [ class "pure-u-1-3" ]
+                    []
+                , if String.isEmpty model.drawnFriend
+                    then drawnView model else afterDrawnView model
+                , div [ class "pure-u-1-3" ]
+                    []
+                ]
+            , p [ class "server-message" ] [ text model.serverMessage ]
+            , p [] [ text (Route.toString model.route) ]
             ]
-        , p [ class "description" ] [ text "Wpisz swoje imie i nazwisko a następnie kiknij 'Losuj', aby wylosować osobę, którą uszczęśliwisz prezetem :)" ]
-        , div [ class "pure-g" ]
-            [ div [ class "pure-u-1-3" ]
-                []
-            , if String.isEmpty model.drawnFriend
-                then drawnView model else afterDrawnView model
-            , div [ class "pure-u-1-3" ]
-                []
-            ]
-        , p [ class "server-message" ] [ text model.serverMessage ]
-        , p []
-            []
-        ]
 
 drawnView : Model -> Html Msg
 drawnView model = div [ class "pure-u-1-3" ]
@@ -179,9 +210,9 @@ capitalize str =
 -- ---------------------------
 
 
-main : Program Int Model Msg
+main : Program () Model Msg
 main =
-    Browser.document
+    Browser.application
         { init = init
         , update = update
         , view =
@@ -190,4 +221,6 @@ main =
                 , body = [ view m ]
                 }
         , subscriptions = \_ -> Sub.none
+        , onUrlRequest = LinkClicked
+        , onUrlChange = UrlChanged
         }
