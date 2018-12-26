@@ -1,0 +1,1 @@
+DROP TABLE drawn_excluded

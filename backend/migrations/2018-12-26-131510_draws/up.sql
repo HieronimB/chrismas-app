@@ -1,0 +1,4 @@
+CREATE TABLE draws (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR NOT NULL
+)
