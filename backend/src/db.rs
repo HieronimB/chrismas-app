@@ -1,5 +1,6 @@
 use crate::schema::draw_result;
 use crate::schema::friends;
+use crate::schema::friends;
 use crate::HttpFriend;
 use diesel;
 use diesel::expression::dsl::not;
