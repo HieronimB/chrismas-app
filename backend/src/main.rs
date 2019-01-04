@@ -1,11 +1,5 @@
-extern crate actix_web;
-extern crate core;
 #[macro_use]
 extern crate diesel;
-extern crate dotenv;
-extern crate rand;
-#[macro_use]
-extern crate serde_derive;
 
 use std::env;
 

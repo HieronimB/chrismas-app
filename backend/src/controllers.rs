@@ -7,6 +7,7 @@ use actix_web::Json;
 use actix_web::State;
 use actix_web::{fs::NamedFile, HttpRequest, HttpResponse, Result};
 use futures::future::Future;
+use serde_derive::Deserialize;
 
 use crate::service::create_draw::CreateDraw;
 use crate::service::execute_draw::ExecuteDraw;
