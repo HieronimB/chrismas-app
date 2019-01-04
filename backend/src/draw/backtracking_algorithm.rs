@@ -17,11 +17,15 @@ pub struct BacktrackingAlgorithm {
 
 //TODO Replace println with proper logging
 impl BacktrackingAlgorithm {
-    pub fn new(to_draw: Vec<i32>, not_drawn: Vec<i32>, drawn_excluded: Vec<(i32, i32)>) -> BacktrackingAlgorithm {
+    pub fn new(
+        to_draw: Vec<i32>,
+        not_drawn: Vec<i32>,
+        drawn_excluded: Vec<(i32, i32)>,
+    ) -> BacktrackingAlgorithm {
         BacktrackingAlgorithm {
             to_draw,
             not_drawn,
-            drawn_excluded
+            drawn_excluded,
         }
     }
 
@@ -65,14 +69,14 @@ impl BacktrackingAlgorithm {
 
             if current_state.drawn_result.is_some() {
                 println!("Found, go to next level");
-                let mut next_to_draw: Vec<i32> = current_state
+                let next_to_draw: Vec<i32> = current_state
                     .to_draw
                     .clone()
                     .into_iter()
                     .filter(|f| *f != current_state.drawn_result.unwrap().0)
                     .collect();
 
-                let mut next_not_drawn: Vec<i32> = current_state
+                let next_not_drawn: Vec<i32> = current_state
                     .not_drawn
                     .clone()
                     .into_iter()
@@ -128,7 +132,7 @@ mod tests {
                 (3, 3),
                 (4, 4),
                 (5, 5),
-            ]
+            ],
         };
 
         let result = bta.draw();
@@ -140,7 +144,7 @@ mod tests {
         let mut bta = BacktrackingAlgorithm {
             to_draw: vec![1],
             not_drawn: vec![1],
-            drawn_excluded: vec![]
+            drawn_excluded: vec![],
         };
 
         let result = bta.draw();
@@ -152,7 +156,7 @@ mod tests {
         let mut bta = BacktrackingAlgorithm {
             to_draw: vec![1, 2, 3, 4],
             not_drawn: vec![1, 2, 3, 4],
-            drawn_excluded: vec![(1, 1), (2, 2), (3, 3), (4, 4), (4, 1), (4, 3)]
+            drawn_excluded: vec![(1, 1), (2, 2), (3, 3), (4, 4), (4, 1), (4, 3)],
         };
 
         let result = bta.draw();
@@ -164,7 +168,7 @@ mod tests {
         let mut bta = BacktrackingAlgorithm {
             to_draw: vec![1],
             not_drawn: vec![1],
-            drawn_excluded: vec![(1, 1)]
+            drawn_excluded: vec![(1, 1)],
         };
 
         let result = bta.draw();
@@ -176,7 +180,7 @@ mod tests {
         let mut bta = BacktrackingAlgorithm {
             to_draw: vec![1, 2, 3],
             not_drawn: vec![1, 2, 3],
-            drawn_excluded: vec![(1, 1), (2, 2), (3, 3), (3, 1), (3, 2)]
+            drawn_excluded: vec![(1, 1), (2, 2), (3, 3), (3, 1), (3, 2)],
         };
 
         let result = bta.draw();
