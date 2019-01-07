@@ -4,10 +4,12 @@ extern crate diesel;
 use std::env;
 
 use actix::SyncArbiter;
-use actix_web::{http, server, App};
-use diesel::pg::PgConnection;
+use actix_web::{App, http, server};
+use actix_web::middleware::Logger;
 use diesel::Connection;
+use diesel::pg::PgConnection;
 use dotenv::dotenv;
+use env_logger;
 
 use crate::controllers::AppState;
 use crate::service::DbExecutor;
@@ -19,6 +21,7 @@ mod service;
 
 fn main() {
     dotenv().ok();
+    env_logger::init();
     let port = env::var("PORT").unwrap_or_else(|_| "8088".to_owned());
     let sys = actix::System::new("chrismas-app");
 
@@ -37,6 +40,7 @@ fn main() {
                 .resource("/execute", |r| {
                     r.method(http::Method::POST).with(controllers::execute_draw)
                 })
+                .middleware(Logger::default())
                 .boxed(),
             App::new()
                 .resource("/assets/{asset:.*}", |r| r.f(controllers::assets))
@@ -47,8 +51,6 @@ fn main() {
     .bind(format!("0.0.0.0:{}", port))
     .unwrap()
     .start();
-
-    println!("Started http server: 127.0.0.1:8080");
 
     let _ = sys.run();
 }

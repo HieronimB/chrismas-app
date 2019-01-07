@@ -6,6 +6,7 @@ use actix::prelude::*;
 use actix_web::error;
 use actix_web::*;
 use diesel::prelude::*;
+use log::debug;
 
 pub struct ExecuteDraw {
     pub name: String,
@@ -23,6 +24,8 @@ impl Handler<ExecuteDraw> for DbExecutor {
         use crate::db::schema::drawn_excluded;
         use crate::db::schema::draws;
         use crate::db::schema::participants;
+
+        debug!("Executing draw: {}", msg.name);
 
         let draw_result: QueryResult<i32> = draws::table
             .select(draws::id)

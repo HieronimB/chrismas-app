@@ -8,6 +8,7 @@ import Html.Events exposing (..)
 import Http exposing (Error(..))
 import Json.Decode as Decode exposing (Decoder, field, map2, string)
 import Route exposing (Route)
+import Create exposing (createDrawView)
 import String exposing (left, dropLeft, toUpper)
 import Url
 
@@ -66,6 +67,7 @@ type Msg
     | OnServerResponse (Result Http.Error Friend)
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
+    | AddParticipant
 
 type alias Friend = { firstname: String, lastname: String }
 
@@ -105,6 +107,7 @@ update message model =
               ( { model | url = url, route = Route.parseUrl url }
               , Cmd.none
               )
+        AddParticipant
 
 drawUrl : Model -> String
 drawUrl model = "/api/draw?firstname=" ++ model.firstname ++ "&lastname=" ++ model.lastname
@@ -157,7 +160,7 @@ view : Model -> Html Msg
 view model =
     case model.route of
         Route.Home -> homeView model
-        Route.NewDraw -> div [ class "container" ] [ p [] [ text (Route.toString model.route) ] ]
+        Route.NewDraw -> createDrawView AddParticipant (\name -> Firstname name) model.firstname
         Route.NotFoundRoute -> div [ class "container" ] [ p [] [ text (Route.toString model.route) ] ]
 
 

@@ -5,6 +5,7 @@ use actix::prelude::*;
 use actix_web::error;
 use actix_web::*;
 use diesel::prelude::*;
+use log::debug;
 
 pub struct CreateDraw {
     pub name: String,
@@ -24,7 +25,7 @@ impl Handler<CreateDraw> for DbExecutor {
         use crate::db::schema::draws;
         use crate::db::schema::participants;
 
-        println!("Inserting new draw");
+        debug!("Inserting new draw: {}", msg.name);
 
         let new_draw = NewDraw {
             name: msg.name.clone(),

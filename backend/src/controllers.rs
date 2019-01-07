@@ -12,6 +12,7 @@ use serde_derive::Deserialize;
 use crate::service::create_draw::CreateDraw;
 use crate::service::execute_draw::ExecuteDraw;
 use crate::service::DbExecutor;
+use log::{info};
 
 pub struct AppState {
     pub db: Addr<DbExecutor>,
@@ -35,7 +36,7 @@ pub fn assets(req: &HttpRequest) -> Result<NamedFile> {
 
 pub fn new_draw((state, draw_json): (State<AppState>, Json<Draw>)) -> FutureResponse<HttpResponse> {
     let draw = draw_json.into_inner();
-    println!("New draw: {:?}", draw);
+    info!("Creating new draw: {:?}", draw);
     state
         .db
         .send(CreateDraw {
@@ -54,8 +55,8 @@ pub fn new_draw((state, draw_json): (State<AppState>, Json<Draw>)) -> FutureResp
 pub fn execute_draw(
     (state, draw_json): (State<AppState>, Json<Draw>),
 ) -> FutureResponse<HttpResponse> {
-    println!("Execute draw");
     let draw = draw_json.into_inner();
+    info!("Execute draw: {}", draw.name);
     state
         .db
         .send(ExecuteDraw { name: draw.name })

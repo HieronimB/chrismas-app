@@ -1,4 +1,5 @@
 use std::vec::IntoIter;
+use log::trace;
 
 #[derive(Debug)]
 struct State {
@@ -15,7 +16,6 @@ pub struct BacktrackingAlgorithm {
     drawn_excluded: Vec<(i32, i32)>,
 }
 
-//TODO Replace println with proper logging
 impl BacktrackingAlgorithm {
     pub fn new(
         to_draw: Vec<i32>,
@@ -42,33 +42,33 @@ impl BacktrackingAlgorithm {
         let mut level = 0;
 
         while level < self.to_draw.len() {
-            println!("Start level: {:?}", level);
+            trace!("Start level: {:?}", level);
             let mut current_state = &mut state_by_level[level];
-            println!("Current state: {:?}", current_state);
+            trace!("Current state: {:?}", current_state);
 
             while let Some(to_draw) = current_state.to_draw_iter.next() {
-                println!("To draw: {:?}", to_draw);
+                trace!("To draw: {:?}", to_draw);
                 current_state.not_drawn_iter = current_state.not_drawn.clone().into_iter();
                 current_state.drawn_result = None;
 
                 while let Some(not_drawn) = current_state.not_drawn_iter.next() {
-                    println!("Not drawn: {:?}", not_drawn);
+                    trace!("Not drawn: {:?}", not_drawn);
                     if !self.drawn_excluded.contains(&(to_draw, not_drawn)) {
-                        println!("Found him");
+                        trace!("Found him");
                         current_state.drawn_result = Some((to_draw, not_drawn));
-                        println!("Current state: {:?}", current_state);
+                        trace!("Current state: {:?}", current_state);
                         break;
                     }
                 }
 
                 if current_state.drawn_result.is_some() {
-                    println!("Found, break outer loop");
+                    trace!("Found, break outer loop");
                     break;
                 }
             }
 
             if current_state.drawn_result.is_some() {
-                println!("Found, go to next level");
+                trace!("Found, go to next level");
                 let next_to_draw: Vec<i32> = current_state
                     .to_draw
                     .clone()
@@ -91,11 +91,11 @@ impl BacktrackingAlgorithm {
                     not_drawn_iter: next_not_drawn.into_iter(),
                 };
 
-                println!("Next state: {:?}", next_state);
+                trace!("Next state: {:?}", next_state);
                 state_by_level.push(next_state);
                 level += 1;
             } else if current_state.drawn_result.is_none() && level > 0 {
-                println!("Go back");
+                trace!("Go back");
                 state_by_level.pop();
                 level -= 1;
             } else {
@@ -108,7 +108,7 @@ impl BacktrackingAlgorithm {
             .filter(|s| s.drawn_result.is_some())
             .map(|s| s.drawn_result.unwrap())
             .collect();
-        println!("Final: {:?}", result);
+        trace!("Final: {:?}", result);
         result
     }
 }
