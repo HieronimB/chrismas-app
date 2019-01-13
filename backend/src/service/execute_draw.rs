@@ -7,6 +7,8 @@ use actix_web::error;
 use actix_web::*;
 use diesel::prelude::*;
 use log::debug;
+use rand::thread_rng;
+use rand::seq::SliceRandom;
 
 pub struct ExecuteDraw {
     pub name: String,
@@ -34,17 +36,22 @@ impl Handler<ExecuteDraw> for DbExecutor {
 
         draw_result
             .and_then(|drawid| {
-                let participants = participants::table
+                let mut participants: Vec<i32> = participants::table
                     .select(participants::id)
                     .filter(participants::drawid.eq(drawid))
                     .load::<i32>(&self.0)?;
+
+                participants.shuffle(&mut thread_rng());
+                let participants_to_draw = participants.clone();
+
+                participants.shuffle(&mut thread_rng());
 
                 let excluded = drawn_excluded::table
                     .select((drawn_excluded::participantid, drawn_excluded::excludedid))
                     .filter(drawn_excluded::drawid.eq(drawid))
                     .load::<(i32, i32)>(&self.0)?;
 
-                let bta = BacktrackingAlgorithm::new(participants.clone(), participants, excluded);
+                let bta = BacktrackingAlgorithm::new(participants_to_draw, participants, excluded);
                 let draw_result = bta.draw();
 
                 let new_draw_result: Vec<NewDrawResult> = draw_result

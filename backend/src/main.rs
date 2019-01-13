@@ -44,7 +44,7 @@ fn main() {
                 .boxed(),
             App::new()
                 .resource("/assets/{asset:.*}", |r| r.f(controllers::assets))
-                .resource("/", |r| r.f(controllers::index))
+                .resource("/{tail:.*}", |r| r.f(controllers::index))
                 .boxed(),
         ]
     })

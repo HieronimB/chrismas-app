@@ -1,16 +1,22 @@
-module Route exposing (..)
+module Route exposing (Route(..), parseUrl, routeParser, toString)
 
-import Url.Parser exposing (Parser, (</>), int, map, oneOf, s, string, top, parse)
 import Url exposing (Url)
+import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, string, top)
 
-type Route = Home | NewDraw | NotFoundRoute
+
+type Route
+    = Home
+    | NewDraw
+    | NotFoundRoute
+
 
 routeParser : Parser (Route -> a) a
 routeParser =
-  oneOf
-    [ map Home top
-    , map NewDraw (s "new")
-    ]
+    oneOf
+        [ map Home top
+        , map NewDraw (s "new")
+        ]
+
 
 parseUrl : Url -> Route
 parseUrl url =
@@ -21,9 +27,15 @@ parseUrl url =
         Nothing ->
             NotFoundRoute
 
+
 toString : Route -> String
 toString route =
     case route of
-        Home -> "Home"
-        NewDraw -> "NewDraw"
-        NotFoundRoute -> "NotFound"
+        Home ->
+            "Home"
+
+        NewDraw ->
+            "NewDraw"
+
+        NotFoundRoute ->
+            "NotFound"
