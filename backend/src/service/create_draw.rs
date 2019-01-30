@@ -14,11 +14,11 @@ pub struct CreateDraw {
 }
 
 impl Message for CreateDraw {
-    type Result = Result<usize, Error>;
+    type Result = Result<i32, Error>;
 }
 
 impl Handler<CreateDraw> for DbExecutor {
-    type Result = Result<usize, Error>;
+    type Result = Result<i32, Error>;
 
     fn handle(&mut self, msg: CreateDraw, _: &mut Self::Context) -> Self::Result {
         use crate::db::schema::drawn_excluded;
@@ -75,7 +75,7 @@ impl Handler<CreateDraw> for DbExecutor {
                     diesel::insert_into(drawn_excluded::table)
                         .values(&excluded)
                         .execute(&self.0)
-                })
+                }).and(Ok(draw.id))
             })
             .map_err(error::ErrorInternalServerError)
     }

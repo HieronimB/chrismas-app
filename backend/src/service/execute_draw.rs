@@ -11,15 +11,15 @@ use rand::thread_rng;
 use rand::seq::SliceRandom;
 
 pub struct ExecuteDraw {
-    pub name: String,
+    pub draw_id: i32,
 }
 
 impl Message for ExecuteDraw {
-    type Result = Result<usize, Error>;
+    type Result = Result<i32, Error>;
 }
 
 impl Handler<ExecuteDraw> for DbExecutor {
-    type Result = Result<usize, Error>;
+    type Result = Result<i32, Error>;
 
     fn handle(&mut self, msg: ExecuteDraw, _: &mut Self::Context) -> Self::Result {
         use crate::db::schema::draw_result;
@@ -27,11 +27,11 @@ impl Handler<ExecuteDraw> for DbExecutor {
         use crate::db::schema::draws;
         use crate::db::schema::participants;
 
-        debug!("Executing draw: {}", msg.name);
+        debug!("Executing draw: {}", msg.draw_id);
 
         let draw_result: QueryResult<i32> = draws::table
             .select(draws::id)
-            .filter(draws::name.eq(&msg.name))
+            .filter(draws::id.eq(&msg.draw_id))
             .first::<i32>(&self.0);
 
         draw_result
@@ -66,7 +66,7 @@ impl Handler<ExecuteDraw> for DbExecutor {
                 diesel::insert_into(draw_result::table)
                     .values(&new_draw_result)
                     .execute(&self.0)
-            })
+            }).and(Ok(msg.draw_id))
             .map_err(error::ErrorInternalServerError)
     }
 }
