@@ -1,14 +1,14 @@
 use crate::draw::backtracking_algorithm::BacktrackingAlgorithm;
 use crate::service::models::*;
 use crate::service::DbExecutor;
+use crate::service::SystemError;
 use actix;
 use actix::prelude::*;
-use actix_web::error;
 use actix_web::*;
 use diesel::prelude::*;
 use log::debug;
-use rand::thread_rng;
 use rand::seq::SliceRandom;
+use rand::thread_rng;
 use uuid::Uuid;
 
 pub struct ExecuteDraw {
@@ -16,11 +16,11 @@ pub struct ExecuteDraw {
 }
 
 impl Message for ExecuteDraw {
-    type Result = Result<Uuid, Error>;
+    type Result = Result<Uuid, SystemError>;
 }
 
 impl Handler<ExecuteDraw> for DbExecutor {
-    type Result = Result<Uuid, Error>;
+    type Result = Result<Uuid, SystemError>;
 
     fn handle(&mut self, msg: ExecuteDraw, _: &mut Self::Context) -> Self::Result {
         use crate::db::schema::draw_result;
@@ -67,7 +67,8 @@ impl Handler<ExecuteDraw> for DbExecutor {
                 diesel::insert_into(draw_result::table)
                     .values(&new_draw_result)
                     .execute(&self.0)
-            }).and(Ok(msg.draw_id))
-            .map_err(error::ErrorInternalServerError)
+            })
+            .and(Ok(msg.draw_id))
+            .map_err(|e| SystemError::DieselError(e))
     }
 }

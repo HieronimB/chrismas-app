@@ -4,10 +4,10 @@ extern crate diesel;
 use std::env;
 
 use actix::SyncArbiter;
-use actix_web::{App, http, server};
 use actix_web::middleware::Logger;
-use diesel::Connection;
+use actix_web::{http, server, App};
 use diesel::pg::PgConnection;
+use diesel::Connection;
 use dotenv::dotenv;
 use env_logger;
 

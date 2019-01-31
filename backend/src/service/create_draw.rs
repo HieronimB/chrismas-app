@@ -1,8 +1,8 @@
 use crate::service::models::*;
 use crate::service::DbExecutor;
+use crate::service::SystemError;
 use actix;
 use actix::prelude::*;
-use actix_web::error;
 use actix_web::*;
 use diesel::prelude::*;
 use log::debug;
@@ -15,11 +15,11 @@ pub struct CreateDraw {
 }
 
 impl Message for CreateDraw {
-    type Result = Result<Uuid, Error>;
+    type Result = Result<Uuid, SystemError>;
 }
 
 impl Handler<CreateDraw> for DbExecutor {
-    type Result = Result<Uuid, Error>;
+    type Result = Result<Uuid, SystemError>;
 
     fn handle(&mut self, msg: CreateDraw, _: &mut Self::Context) -> Self::Result {
         use crate::db::schema::drawn_excluded;
@@ -52,33 +52,35 @@ impl Handler<CreateDraw> for DbExecutor {
                     .values(&new_participants)
                     .get_results(&self.0);
 
-                participants_result.and_then(|participants: Vec<Participants>| {
-                    let excluded: Vec<NewExcluded> = msg
-                        .excluded
-                        .iter()
-                        .map(|e| {
-                            let participant = participants
-                                .iter()
-                                .find(|p| p.name == e.0)
-                                .expect("Could not find participant inserted into database");
-                            let excluded = participants
-                                .iter()
-                                .find(|p| p.name == e.1)
-                                .expect("Could not find draw_excluded inserted into database");
+                participants_result
+                    .and_then(|participants: Vec<Participants>| {
+                        let excluded: Vec<NewExcluded> = msg
+                            .excluded
+                            .iter()
+                            .map(|e| {
+                                let participant = participants
+                                    .iter()
+                                    .find(|p| p.name == e.0)
+                                    .expect("Could not find participant inserted into database");
+                                let excluded = participants
+                                    .iter()
+                                    .find(|p| p.name == e.1)
+                                    .expect("Could not find draw_excluded inserted into database");
 
-                            NewExcluded {
-                                participantid: participant.id,
-                                excludedid: excluded.id,
-                                drawid: draw.id,
-                            }
-                        })
-                        .collect();
+                                NewExcluded {
+                                    participantid: participant.id,
+                                    excludedid: excluded.id,
+                                    drawid: draw.id,
+                                }
+                            })
+                            .collect();
 
-                    diesel::insert_into(drawn_excluded::table)
-                        .values(&excluded)
-                        .execute(&self.0)
-                }).and(Ok(draw.id))
+                        diesel::insert_into(drawn_excluded::table)
+                            .values(&excluded)
+                            .execute(&self.0)
+                    })
+                    .and(Ok(draw.id))
             })
-            .map_err(error::ErrorInternalServerError)
+            .map_err(|e| SystemError::DieselError(e))
     }
 }

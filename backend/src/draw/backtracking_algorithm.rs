@@ -1,5 +1,5 @@
-use std::vec::IntoIter;
 use log::trace;
+use std::vec::IntoIter;
 
 #[derive(Debug)]
 struct State {

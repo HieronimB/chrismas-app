@@ -37,9 +37,4 @@ joinable!(draw_result -> draws (drawid));
 joinable!(drawn_excluded -> draws (drawid));
 joinable!(participants -> draws (drawid));
 
-allow_tables_to_appear_in_same_query!(
-    drawn_excluded,
-    draw_result,
-    draws,
-    participants,
-);
+allow_tables_to_appear_in_same_query!(drawn_excluded, draw_result, draws, participants,);
