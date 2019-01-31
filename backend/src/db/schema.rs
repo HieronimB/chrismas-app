@@ -6,7 +6,7 @@ table! {
     drawn_excluded (participantid, excludedid) {
         participantid -> Int4,
         excludedid -> Int4,
-        drawid -> Int4,
+        drawid -> Uuid,
     }
 }
 
@@ -14,13 +14,13 @@ table! {
     draw_result (participantid, drawnid) {
         participantid -> Int4,
         drawnid -> Int4,
-        drawid -> Int4,
+        drawid -> Uuid,
     }
 }
 
 table! {
     draws (id) {
-        id -> Int4,
+        id -> Uuid,
         name -> Varchar,
     }
 }
@@ -29,7 +29,7 @@ table! {
     participants (id) {
         id -> Int4,
         name -> Varchar,
-        drawid -> Int4,
+        drawid -> Uuid,
     }
 }
 
@@ -37,4 +37,9 @@ joinable!(draw_result -> draws (drawid));
 joinable!(drawn_excluded -> draws (drawid));
 joinable!(participants -> draws (drawid));
 
-allow_tables_to_appear_in_same_query!(drawn_excluded, draw_result, draws, participants,);
+allow_tables_to_appear_in_same_query!(
+    drawn_excluded,
+    draw_result,
+    draws,
+    participants,
+);

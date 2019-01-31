@@ -7,16 +7,18 @@ use crate::db::schema::drawn_excluded;
 use crate::db::schema::draws;
 use crate::db::schema::participants;
 use diesel::{Insertable, Queryable};
+use uuid::Uuid;
 
 #[derive(Insertable)]
 #[table_name = "draws"]
 pub struct NewDraw {
+    pub id: Uuid,
     pub name: String,
 }
 
 #[derive(Queryable)]
 pub struct Draw {
-    pub id: i32,
+    pub id: Uuid,
     pub name: String,
 }
 
@@ -24,14 +26,14 @@ pub struct Draw {
 #[table_name = "participants"]
 pub struct NewParticipants {
     pub name: String,
-    pub drawid: i32,
+    pub drawid: Uuid,
 }
 
 #[derive(Queryable)]
 pub struct Participants {
     pub id: i32,
     pub name: String,
-    pub drawid: i32,
+    pub drawid: Uuid,
 }
 
 #[derive(Insertable)]
@@ -39,7 +41,7 @@ pub struct Participants {
 pub struct NewExcluded {
     pub participantid: i32,
     pub excludedid: i32,
-    pub drawid: i32,
+    pub drawid: Uuid,
 }
 
 #[derive(Insertable)]
@@ -47,5 +49,5 @@ pub struct NewExcluded {
 pub struct NewDrawResult {
     pub participantid: i32,
     pub drawnid: i32,
-    pub drawid: i32,
+    pub drawid: Uuid,
 }

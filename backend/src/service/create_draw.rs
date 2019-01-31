@@ -6,6 +6,7 @@ use actix_web::error;
 use actix_web::*;
 use diesel::prelude::*;
 use log::debug;
+use uuid::Uuid;
 
 pub struct CreateDraw {
     pub name: String,
@@ -14,11 +15,11 @@ pub struct CreateDraw {
 }
 
 impl Message for CreateDraw {
-    type Result = Result<i32, Error>;
+    type Result = Result<Uuid, Error>;
 }
 
 impl Handler<CreateDraw> for DbExecutor {
-    type Result = Result<i32, Error>;
+    type Result = Result<Uuid, Error>;
 
     fn handle(&mut self, msg: CreateDraw, _: &mut Self::Context) -> Self::Result {
         use crate::db::schema::drawn_excluded;
@@ -28,6 +29,7 @@ impl Handler<CreateDraw> for DbExecutor {
         debug!("Inserting new draw: {}", msg.name);
 
         let new_draw = NewDraw {
+            id: Uuid::new_v4(),
             name: msg.name.clone(),
         };
 

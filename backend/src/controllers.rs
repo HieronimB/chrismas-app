@@ -7,14 +7,12 @@ use actix_web::Json;
 use actix_web::State;
 use actix_web::{fs::NamedFile, HttpRequest, HttpResponse, Result};
 use futures::future::Future;
-use futures::prelude::*;
 use serde_derive::Deserialize;
 
 use crate::service::create_draw::CreateDraw;
 use crate::service::execute_draw::ExecuteDraw;
 use crate::service::DbExecutor;
 use log::{info};
-use actix_web::Error;
 
 pub struct AppState {
     pub db: Addr<DbExecutor>,
@@ -46,8 +44,8 @@ pub fn new_draw((state, draw_json): (State<AppState>, Json<Draw>)) -> FutureResp
             participants: draw.participants,
             excluded: draw.excluded,
         })
-        .and_then(move |res| state.db.send(ExecuteDraw { draw_id: res.unwrap() }))
-        .map(|res| HttpResponse::Ok().finish())
+        .and_then(move |res| state.db.send(ExecuteDraw { draw_id: res.unwrap() })) //TODO Get rid of this unwrap
+        .map(|_res| HttpResponse::Ok().finish())
         .from_err()
         .responder()
 }

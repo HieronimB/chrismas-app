@@ -9,17 +9,18 @@ use diesel::prelude::*;
 use log::debug;
 use rand::thread_rng;
 use rand::seq::SliceRandom;
+use uuid::Uuid;
 
 pub struct ExecuteDraw {
-    pub draw_id: i32,
+    pub draw_id: Uuid,
 }
 
 impl Message for ExecuteDraw {
-    type Result = Result<i32, Error>;
+    type Result = Result<Uuid, Error>;
 }
 
 impl Handler<ExecuteDraw> for DbExecutor {
-    type Result = Result<i32, Error>;
+    type Result = Result<Uuid, Error>;
 
     fn handle(&mut self, msg: ExecuteDraw, _: &mut Self::Context) -> Self::Result {
         use crate::db::schema::draw_result;
@@ -29,10 +30,10 @@ impl Handler<ExecuteDraw> for DbExecutor {
 
         debug!("Executing draw: {}", msg.draw_id);
 
-        let draw_result: QueryResult<i32> = draws::table
+        let draw_result: QueryResult<Uuid> = draws::table
             .select(draws::id)
             .filter(draws::id.eq(&msg.draw_id))
-            .first::<i32>(&self.0);
+            .first::<Uuid>(&self.0);
 
         draw_result
             .and_then(|drawid| {
