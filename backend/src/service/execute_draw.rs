@@ -69,6 +69,6 @@ impl Handler<ExecuteDraw> for DbExecutor {
                     .execute(&self.0)
             })
             .and(Ok(msg.draw_id))
-            .map_err(|e| SystemError::DieselError(e))
+            .map_err(SystemError::DieselError)
     }
 }

@@ -81,6 +81,6 @@ impl Handler<CreateDraw> for DbExecutor {
                     })
                     .and(Ok(draw.id))
             })
-            .map_err(|e| SystemError::DieselError(e))
+            .map_err(SystemError::DieselError)
     }
 }

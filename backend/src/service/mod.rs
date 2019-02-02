@@ -4,6 +4,7 @@ use diesel::pg::PgConnection;
 
 pub mod create_draw;
 pub mod execute_draw;
+pub mod find_drawn;
 mod models;
 
 pub struct DbExecutor(pub PgConnection);
@@ -12,6 +13,7 @@ impl Actor for DbExecutor {
     type Context = SyncContext<Self>;
 }
 
+//TODO Improve error handling
 pub enum SystemError {
     Mailbox(actix::MailboxError),
     DieselError(diesel::result::Error),

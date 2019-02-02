@@ -37,6 +37,9 @@ fn main() {
                 .resource("/create", |r| {
                     r.method(http::Method::POST).with(controllers::new_draw)
                 })
+                .resource("/drawn", |r| {
+                    r.method(http::Method::POST).with(controllers::find_drawn)
+                })
                 .middleware(Logger::default())
                 .boxed(),
             App::new()
