@@ -9,6 +9,7 @@ type Route
     | Draw String
     | NewDraw
     | NotFoundRoute
+    | DrawLink
 
 
 routeParser : Parser (Route -> a) a
@@ -17,6 +18,7 @@ routeParser =
         [ map Home top
         , map Draw (s "draw" </> string)
         , map NewDraw (s "new")
+        , map DrawLink (s "draw-link")
         ]
 
 
@@ -44,3 +46,6 @@ toString route =
 
         NotFoundRoute ->
             "NotFound"
+
+        DrawLink -> "DrawLink"
+

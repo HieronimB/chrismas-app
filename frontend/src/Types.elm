@@ -17,6 +17,7 @@ type alias Model =
     , route : Route
     , draw : NewDraw
     , participantName : String
+    , drawId : String
     }
 
 
@@ -36,7 +37,7 @@ type Msg
     | AddParticipant String
     | UpdateParticipant String
     | UpdateDrawName String
-    | OnDrawCreated (Result Http.Error Int)
+    | OnDrawCreated (Result Http.Error String)
 
 
 type alias Friend =

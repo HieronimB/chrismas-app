@@ -19,6 +19,7 @@ init flags url key =
       , url = url
       , route = Route.parseUrl url
       , participantName = ""
+      , drawId = ""
       , draw =
             { name = ""
             , participants = []
@@ -68,7 +69,7 @@ update message model =
             )
 
         CreateDraw ->
-            ( model, Http.post createDrawUrl (Http.jsonBody (encodeNewDraw model.draw)) Decode.int |> Http.send OnDrawCreated )
+            ( model, Http.post createDrawUrl (Http.jsonBody (encodeNewDraw model.draw)) Decode.string |> Http.send OnDrawCreated )
 
         UpdateParticipant participant ->
             ( { model | participantName = participant }, Cmd.none )
@@ -86,7 +87,7 @@ update message model =
         OnDrawCreated result ->
             case result of
                             Ok r ->
-                                ( { model | serverMessage = "Draw created with id: " ++ String.fromInt r }, Cmd.none )
+                                ( { model | drawId = r }, (Nav.pushUrl model.key "draw-link"))
 
                             Err err ->
                                 ( { model | serverMessage = "Error when creating new draw" }, Cmd.none )
@@ -95,7 +96,7 @@ update message model =
 
 drawUrl : Model -> String
 drawUrl model =
-    "/api/draw"
+    "/api/drawn"
 
 
 createDrawUrl : String
@@ -109,6 +110,13 @@ encodeNewDraw newDraw =
         [ ( "name", Encode.string newDraw.name )
         , ( "participants", Encode.list Encode.string newDraw.participants )
         , ( "excluded", Encode.list (Encode.list Encode.string) newDraw.excluded )
+        ]
+
+encodeDrawn : String -> Int -> Value
+encodeDrawn drawId participant =
+    Encode.object
+        [ ( "drawId", Encode.string drawId )
+        , ( "participant", Encode.int participant )
         ]
 
 

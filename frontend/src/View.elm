@@ -22,6 +22,9 @@ root model =
         Route.Draw string ->
             homeView model
 
+        Route.DrawLink ->
+            div [ class "container" ] [ p [] [ text ("DrawId: " ++ model.drawId) ] ]
+
 
 homeView : Model -> Html Msg
 homeView model =
