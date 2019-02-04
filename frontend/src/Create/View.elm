@@ -14,53 +14,56 @@ root : Model -> Html Msg
 root model =
     layout [] <|
         column [ height fill, width fill ]
-            [ channelPanel
-            , el [ height <| fillPortion 1 ] (text model.participantName)
-            , el [ height <| fillPortion 1 ] (text (List.foldl addWithSpace  "" model.draw.participants))
-            , el [ height <| fillPortion 1 ] (text <| List.foldl addWithSpace "" (List.foldl (++) [] model.draw.excluded))
-            , newDrawName model
-            , newParticipantInput model
-            , createDrawBtn
+            [ headerPanel
+            , mainPanel model
             ]
 
-addWithSpace: String -> String -> String
-addWithSpace first second = first ++ ", " ++ second
 
-foldArray: List String -> List String -> List String
-foldArray first second =  ["[" ++ (List.foldl addWithSpace  "" first) ++ "] " ++ "[" ++ (List.foldl addWithSpace  "" second) ++ "] "]
-
-channelPanel : Element Msg
-channelPanel =
-    column
+headerPanel : Element Msg
+headerPanel =
+    row
         [ height <| fillPortion 1
         , width fill
         , Background.color <| rgb255 92 99 118
         , Font.color <| rgb255 255 255 255
         ]
-        [ text "New Draw" ]
+        [ text "Create new draw" ]
 
 
-newParticipantInput : Model -> Element Msg
-newParticipantInput model =
-    row [ height <| fillPortion 1 ]
-        [ Input.button
-            [ Background.color blue
-            , Font.color white
-            , Border.color darkBlue
-            , paddingXY 32 16
-            , Border.rounded 3
-            , width fill
-            ]
-            { label = text "Add Participant"
-            , onPress = Just <| AddParticipant model.participantName
-            }
-        , Input.text []
-            { text = model.participantName
-            , onChange = \name -> UpdateParticipant name
-            , placeholder = Nothing
-            , label = Input.labelAbove [ Font.size 14, paddingXY 0 5 ] (text "Participant")
-            }
+mainPanel : Model -> Element Msg
+mainPanel model =
+    row
+        [ height <| fillPortion 6
+        , width fill
         ]
+        [ interactivePanel model
+        , viewPanel model
+        ]
+
+
+interactivePanel : Model -> Element Msg
+interactivePanel model =
+    column
+        [ height <| fillPortion 1
+        , width fill
+        ]
+        [ newDrawName model
+        , newParticipantInput model
+        , createDrawBtn
+        ]
+
+
+viewPanel : Model -> Element Msg
+viewPanel model =
+    column
+        [ height <| fillPortion 1
+        , width fill
+        ]
+        (participantsList model)
+
+participantsList : Model -> List (Element Msg)
+participantsList model =
+    List.map (\p -> el [ height <| fillPortion 1 ] (text p)) model.draw.participants
 
 
 newDrawName : Model -> Element Msg
@@ -74,6 +77,29 @@ newDrawName model =
             }
 
 
+newParticipantInput : Model -> Element Msg
+newParticipantInput model =
+    column [ height <| fillPortion 1 ]
+        [ Input.text []
+            { text = model.participantName
+            , onChange = \name -> UpdateParticipant name
+            , placeholder = Nothing
+            , label = Input.labelAbove [ Font.size 14, paddingXY 0 5 ] (text "Participant")
+            }
+        , Input.button
+            [ Background.color blue
+            , Font.color white
+            , Border.color darkBlue
+            , paddingXY 32 16
+            , Border.rounded 3
+            , width fill
+            ]
+            { label = text "Add Participant"
+            , onPress = Just <| AddParticipant model.participantName
+            }
+        ]
+
+
 createDrawBtn : Element Msg
 createDrawBtn =
     el [ height <| fillPortion 1 ] <|
@@ -85,7 +111,7 @@ createDrawBtn =
             , Border.rounded 3
             , width fill
             ]
-            { label = text "Create"
+            { label = text "Finish"
             , onPress = Just <| CreateDraw
             }
 

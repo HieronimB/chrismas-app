@@ -19,6 +19,9 @@ root model =
         Route.NotFoundRoute ->
             div [ class "container" ] [ p [] [ text (Route.toString model.route) ] ]
 
+        Route.Draw string ->
+            homeView model
+
 
 homeView : Model -> Html Msg
 homeView model =
