@@ -1,5 +1,6 @@
 module Types exposing (..)
 
+import Autocomplete.Menu
 import Browser
 import Browser.Navigation exposing (Key)
 import Element
@@ -18,6 +19,8 @@ type alias Model =
     , draw : NewDraw
     , participantName : String
     , drawId : String
+    , autocomplete: Autocomplete.Menu.Model
+    , currentFocus : Focused
     }
 
 
@@ -38,7 +41,11 @@ type Msg
     | UpdateParticipant String
     | UpdateDrawName String
     | OnDrawCreated (Result Http.Error String)
+    | AutoCompleteMsg Autocomplete.Menu.Msg
 
+type Focused
+    = Simple
+    | None
 
 type alias Friend =
     { firstname : String, lastname : String }

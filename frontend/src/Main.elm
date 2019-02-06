@@ -1,11 +1,13 @@
 port module Main exposing (main, toJs)
 
 import Browser
-import State exposing (init, update)
+import State exposing (init, update, subscriptions)
 import Types exposing (..)
 import View
 
+
 port toJs : String -> Cmd msg
+
 
 main : Program () Model Msg
 main =
@@ -17,7 +19,7 @@ main =
                 { title = "Losowanie"
                 , body = [ View.root m ]
                 }
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         , onUrlRequest = LinkClicked
         , onUrlChange = UrlChanged
         }

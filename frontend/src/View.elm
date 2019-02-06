@@ -1,5 +1,6 @@
 module View exposing (root)
 
+import Autocomplete.Menu
 import Create.View exposing (root)
 import Html exposing (Html, button, div, h1, header, input, p, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
@@ -57,6 +58,7 @@ drawnView model =
     div [ class "pure-u-1-3" ]
         [ input [ type_ "text", placeholder "Imie" ] []
         , input [ type_ "text", placeholder "Nazwisko" ] []
+        , Html.map AutoCompleteMsg (Autocomplete.Menu.view model.autocomplete)
         , div [ class "button-div" ]
             [ button
                 [ class "pure-button pure-button-primary btn-draw"

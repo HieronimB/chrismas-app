@@ -1,5 +1,6 @@
-module State exposing (capitalize, createDrawUrl, decodeFirstname, decodeLastname, drawUrl, encodeNewDraw, friendDecoder, init, update)
+module State exposing (subscriptions, capitalize, createDrawUrl, decodeFirstname, decodeLastname, drawUrl, encodeNewDraw, friendDecoder, init, update)
 
+import Autocomplete.Menu
 import Browser
 import Browser.Navigation as Nav
 import Http
@@ -25,9 +26,18 @@ init flags url key =
             , participants = []
             , excluded = []
             }
+      , autocomplete = Autocomplete.Menu.init
+      , currentFocus = None
       }
     , Cmd.none
     )
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    case model.currentFocus of
+        Simple ->
+            Sub.map AutoCompleteMsg (Autocomplete.Menu.subscriptions model.autocomplete)
+        None -> Sub.none
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -43,6 +53,7 @@ update message model =
 
         Draw ->
             ( model, Http.get (drawUrl model) friendDecoder |> Http.send OnServerResponse )
+
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
@@ -86,12 +97,26 @@ update message model =
 
         OnDrawCreated result ->
             case result of
-                            Ok r ->
-                                ( { model | drawId = r }, (Nav.pushUrl model.key "draw-link"))
+                Ok r ->
+                    ( { model | drawId = r }, Nav.pushUrl model.key "draw-link" )
 
-                            Err err ->
-                                ( { model | serverMessage = "Error when creating new draw" }, Cmd.none )
+                Err err ->
+                    ( { model | serverMessage = "Error when creating new draw" }, Cmd.none )
 
+        AutoCompleteMsg autoMsg ->
+            let
+                updatedModel =
+                    { model
+                        | autocomplete =
+                            Tuple.first (Autocomplete.Menu.update autoMsg model.autocomplete)
+                    }
+            in
+            case autoMsg of
+                Autocomplete.Menu.OnFocus ->
+                    ({ updatedModel | currentFocus = Simple }, Cmd.none)
+
+                _ ->
+                    (updatedModel, Cmd.none)
 
 
 drawUrl : Model -> String
@@ -111,6 +136,7 @@ encodeNewDraw newDraw =
         , ( "participants", Encode.list Encode.string newDraw.participants )
         , ( "excluded", Encode.list (Encode.list Encode.string) newDraw.excluded )
         ]
+
 
 encodeDrawn : String -> Int -> Value
 encodeDrawn drawId participant =
