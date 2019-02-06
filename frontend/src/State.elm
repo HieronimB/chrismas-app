@@ -52,7 +52,7 @@ update message model =
                     ( { model | serverMessage = "Przepraszam, ale nie wiem kim jesteś " }, Cmd.none )
 
         Draw ->
-            ( model, Http.get (drawUrl model) friendDecoder |> Http.send OnServerResponse )
+            ( model, Http.get { url = (drawUrl model), expect = Http.expectJson OnServerResponse friendDecoder }  )
 
         LinkClicked urlRequest ->
             case urlRequest of
@@ -80,7 +80,7 @@ update message model =
             )
 
         CreateDraw ->
-            ( model, Http.post createDrawUrl (Http.jsonBody (encodeNewDraw model.draw)) Decode.string |> Http.send OnDrawCreated )
+            ( model, Http.post { url = createDrawUrl, body = (Http.jsonBody (encodeNewDraw model.draw)), expect = Http.expectString OnDrawCreated } )
 
         UpdateParticipant participant ->
             ( { model | participantName = participant }, Cmd.none )
@@ -101,7 +101,7 @@ update message model =
                     ( { model | drawId = r }, Nav.pushUrl model.key "draw-link" )
 
                 Err err ->
-                    ( { model | serverMessage = "Error when creating new draw" }, Cmd.none )
+                    ( { model | serverMessage = "Error when creating new draw!" }, Cmd.none )
 
         AutoCompleteMsg autoMsg ->
             let
