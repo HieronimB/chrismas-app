@@ -15,6 +15,8 @@ use crate::service::find_drawn::FindDrawn;
 use crate::service::DbExecutor;
 use log::info;
 use uuid::Uuid;
+use actix_web::Path;
+use crate::service::find_participants::FindParticipants;
 
 pub struct AppState {
     pub db: Addr<DbExecutor>,
@@ -74,6 +76,20 @@ pub fn find_drawn(
         })
         .flatten()
         .map(|drawn_name| HttpResponse::Ok().json(drawn_name))
+        .map_err(actix_web::Error::from)
+        .responder()
+}
+
+pub fn find_participants((state, draw_id): (State<AppState>, Path<Uuid>)) -> FutureResponse<HttpResponse> {
+    info!("Find participants: {:?}", draw_id);
+
+    state
+        .db
+        .send(FindParticipants {
+            draw_id: draw_id.into_inner(),
+        })
+        .flatten()
+        .map(|participants| HttpResponse::Ok().json(participants))
         .map_err(actix_web::Error::from)
         .responder()
 }

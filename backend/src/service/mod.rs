@@ -5,6 +5,7 @@ use diesel::pg::PgConnection;
 pub mod create_draw;
 pub mod execute_draw;
 pub mod find_drawn;
+pub mod find_participants;
 mod models;
 
 pub struct DbExecutor(pub PgConnection);

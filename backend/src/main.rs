@@ -40,6 +40,9 @@ fn main() {
                 .resource("/drawn", |r| {
                     r.method(http::Method::POST).with(controllers::find_drawn)
                 })
+                .resource("/participants/{draw_id}", |r| {
+                    r.method(http::Method::GET).with(controllers::find_participants)
+                })
                 .middleware(Logger::default())
                 .boxed(),
             App::new()
