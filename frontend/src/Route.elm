@@ -5,8 +5,7 @@ import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, string, to
 
 
 type Route
-    = Home
-    | Draw String
+    = Draw String
     | NewDraw
     | NotFoundRoute
     | DrawLink
@@ -15,7 +14,7 @@ type Route
 routeParser : Parser (Route -> a) a
 routeParser =
     oneOf
-        [ map Home top
+        [ map NewDraw top
         , map Draw (s "draw" </> string)
         , map NewDraw (s "new")
         , map DrawLink (s "draw-link")
@@ -35,9 +34,6 @@ parseUrl url =
 toString : Route -> String
 toString route =
     case route of
-        Home ->
-            "Home"
-
         Draw id ->
             "Home"
 
