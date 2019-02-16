@@ -1,8 +1,9 @@
-module State exposing (subscriptions, capitalize, createDrawUrl, decodeFirstname, decodeLastname, drawUrl, encodeNewDraw, friendDecoder, init, update)
+module State exposing (subscriptions, capitalize, decodeFirstname, decodeLastname, drawUrl, friendDecoder, init, update)
 
 import Autocomplete.Menu
 import Browser
 import Browser.Navigation as Nav
+import Create.State
 import Http
 import Json.Decode as Decode exposing (Decoder, field, map2, string)
 import Json.Encode as Encode exposing (..)
@@ -19,15 +20,10 @@ init flags url key =
       , key = key
       , url = url
       , route = Route.parseUrl url
-      , participantName = ""
-      , drawId = ""
-      , draw =
-            { name = ""
-            , participants = []
-            , excluded = []
-            }
+      , create = Create.State.init
       , autocomplete = Autocomplete.Menu.init
       , currentFocus = None
+      , drawId = ""
       }
     , Cmd.none
     )
@@ -38,7 +34,6 @@ subscriptions model =
         Simple ->
             Sub.map AutoCompleteMsg (Autocomplete.Menu.subscriptions model.autocomplete)
         None -> Sub.none
-
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
@@ -67,42 +62,6 @@ update message model =
             , Cmd.none
             )
 
-        AddParticipant participant ->
-            let
-                oldDraw =
-                    model.draw
-
-                newNew =
-                    { oldDraw | participants = participant :: oldDraw.participants, excluded = [ participant, participant ] :: oldDraw.excluded }
-            in
-            ( { model | draw = newNew, participantName = "" }
-            , Cmd.none
-            )
-
-        CreateDraw ->
-            ( model, Http.post { url = createDrawUrl, body = (Http.jsonBody (encodeNewDraw model.draw)), expect = Http.expectString OnDrawCreated } )
-
-        UpdateParticipant participant ->
-            ( { model | participantName = participant }, Cmd.none )
-
-        UpdateDrawName drawName ->
-            let
-                oldDraw =
-                    model.draw
-
-                newDraw =
-                    { oldDraw | name = drawName }
-            in
-            ( { model | draw = newDraw }, Cmd.none )
-
-        OnDrawCreated result ->
-            case result of
-                Ok r ->
-                    ( { model | drawId = r }, Nav.pushUrl model.key "draw-link" )
-
-                Err err ->
-                    ( { model | serverMessage = "Error when creating new draw!" }, Cmd.none )
-
         AutoCompleteMsg autoMsg ->
             let
                 updatedModel =
@@ -118,25 +77,25 @@ update message model =
                 _ ->
                     (updatedModel, Cmd.none)
 
+        CreateDrawMsg internalMsg -> let (updatedModel, cmd) = Create.State.update internalMsg model.create
+            in ({ model | create = updatedModel }, Cmd.map createTranslator cmd)
+
+        UpdateServerMessage serverMessage -> ({ model | serverMessage = serverMessage }, Cmd.none)
+
+        OnDrawCreated result ->
+                                case result of
+                                    Ok r ->
+                                        ( { model | drawId = r }, Nav.pushUrl model.key "draw-link" )
+
+                                    Err err ->
+                                        ( { model | serverMessage = "Could not create draw" }, Cmd.none )
+
+
+
 
 drawUrl : Model -> String
 drawUrl model =
     "/api/drawn"
-
-
-createDrawUrl : String
-createDrawUrl =
-    "/api/create"
-
-
-encodeNewDraw : NewDraw -> Value
-encodeNewDraw newDraw =
-    Encode.object
-        [ ( "name", Encode.string newDraw.name )
-        , ( "participants", Encode.list Encode.string newDraw.participants )
-        , ( "excluded", Encode.list (Encode.list Encode.string) newDraw.excluded )
-        ]
-
 
 encodeDrawn : String -> Int -> Value
 encodeDrawn drawId participant =

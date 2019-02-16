@@ -14,7 +14,7 @@ root : Model -> Html Msg
 root model =
     case model.route of
         Route.NewDraw ->
-            Create.View.root model
+            Html.map createTranslator (Create.View.root model.create)
 
         Route.NotFoundRoute ->
             div [ class "container" ] [ p [] [ text (Route.toString model.route) ] ]

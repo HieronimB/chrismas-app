@@ -1,5 +1,6 @@
 module Create.View exposing (root)
 
+import Create.Types exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -7,7 +8,6 @@ import Element.Events exposing (..)
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
-import Types exposing (..)
 
 
 root : Model -> Html Msg
@@ -71,7 +71,7 @@ newDrawName model =
     el [ height <| fillPortion 1 ] <|
         Input.text []
             { text = model.draw.name
-            , onChange = \name -> UpdateDrawName name
+            , onChange = \name -> ForSelf (UpdateDrawName name)
             , placeholder = Nothing
             , label = Input.labelAbove [ Font.size 14, paddingXY 0 5 ] (text "Draw Name")
             }
@@ -82,7 +82,7 @@ newParticipantInput model =
     column [ height <| fillPortion 1 ]
         [ Input.text []
             { text = model.participantName
-            , onChange = \name -> UpdateParticipant name
+            , onChange = \name -> ForSelf (UpdateParticipant name)
             , placeholder = Nothing
             , label = Input.labelAbove [ Font.size 14, paddingXY 0 5 ] (text "Participant")
             }
@@ -95,7 +95,7 @@ newParticipantInput model =
             , width fill
             ]
             { label = text "Add Participant"
-            , onPress = Just <| AddParticipant model.participantName
+            , onPress = Just <| ForSelf (AddParticipant model.participantName)
             }
         ]
 
@@ -112,7 +112,7 @@ createDrawBtn =
             , width fill
             ]
             { label = text "Finish"
-            , onPress = Just <| CreateDraw
+            , onPress = Just <| ForSelf CreateDraw
             }
 
 
