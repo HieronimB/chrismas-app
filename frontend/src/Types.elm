@@ -1,10 +1,9 @@
 module Types exposing (..)
 
-import Autocomplete.Menu
 import Browser
 import Browser.Navigation exposing (Key)
 import Create.Types
-import Element
+import Draw.Types
 import Http
 import Route exposing (Route)
 import Url
@@ -13,36 +12,33 @@ import Url
 type alias Model =
     {
      serverMessage : String
-    , drawnFriend : String
     , key : Key
     , url : Url.Url
     , route : Route
     , create : Create.Types.Model
-    , autocomplete: Autocomplete.Menu.Model
-    , currentFocus : Focused
     , drawId : String
+    , draw : Draw.Types.Model
     }
 
 type Msg
-    = Draw
-    | OnServerResponse (Result Http.Error Friend)
+    = DrawMsg Draw.Types.InternalMsg
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
     | CreateDrawMsg Create.Types.InternalMsg
-    | AutoCompleteMsg Autocomplete.Menu.Msg
     | UpdateServerMessage String
     | OnDrawCreated (Result Http.Error String)
+    | GoToCreateView
 
-type Focused
-    = Simple
-    | None
-
-type alias Friend =
-    { firstname : String, lastname : String }
-
-translationDictionary
+createTranslationDictionary
   = { onCreateDrawMsg = CreateDrawMsg
     , onDrawCreatedMsg = OnDrawCreated
     }
 
-createTranslator = Create.Types.translator translationDictionary
+createTranslator = Create.Types.translator createTranslationDictionary
+
+drawTranslationDictionary
+  = { onDrawMsg = DrawMsg
+    , onGoToCreatedMsg = GoToCreateView
+    }
+
+drawTranslator = Draw.Types.translator drawTranslationDictionary
