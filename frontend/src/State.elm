@@ -4,13 +4,17 @@ import Browser
 import Browser.Navigation as Nav
 import Create.State
 import Draw.State
-import Route
+import Route exposing (Route(..))
 import Types exposing (..)
 import Url
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
+    let
+        newRoute = Route.parseUrl url
+        newCmd = onNewRoute newRoute
+    in
     ( { serverMessage = ""
       , key = key
       , url = url
@@ -19,7 +23,7 @@ init flags url key =
       , drawId = ""
       , draw = Draw.State.init
       }
-    , Cmd.none
+    , newCmd
     )
 
 subscriptions : Model -> Sub Msg
@@ -38,8 +42,12 @@ update message model =
                     ( model, Nav.load href )
 
         UrlChanged url ->
-            ( { model | url = url, route = Route.parseUrl url }
-            , Cmd.none
+            let
+             newRoute = Route.parseUrl url
+             newCmd = onNewRoute newRoute
+            in
+            ( { model | url = url, route = newRoute }
+            , newCmd
             )
 
         CreateDrawMsg internalMsg -> let (updatedModel, cmd) = Create.State.update internalMsg model.create
@@ -59,4 +67,18 @@ update message model =
                             in ({ model | draw = updatedModel }, Cmd.map drawTranslator cmd)
 
         GoToCreateView -> (model, Cmd.none)
+
+onNewRoute : Route -> Cmd Msg
+onNewRoute route =
+    case route of
+        Draw drawId -> Cmd.map drawTranslator (Draw.State.fetchParticipants drawId)
+
+
+        NewDraw -> Cmd.none
+
+
+        NotFoundRoute -> Cmd.none
+
+
+        DrawLink -> Cmd.none
 

@@ -1,9 +1,9 @@
 module Draw.State exposing (..)
 
-import Autocomplete.Menu
-import Draw.Types exposing (Focused(..), Friend, InternalMsg(..), Model, Msg(..))
+import Autocomplete.Menu exposing (Msg(..))
+import Draw.Types exposing (DrawId, Focused(..), Friend, InternalMsg(..), Model, Msg(..))
 import Http
-import Json.Decode exposing (Decoder, field, map2, string)
+import Json.Decode exposing (Decoder, field, map2, string, list)
 import String exposing (dropLeft, left, toUpper)
 
 init : Model
@@ -52,10 +52,26 @@ update msg model =
                         _ ->
                             (updatedModel, Cmd.none)
 
+    FetchParticipantsResponse result ->
+            case result of
+                Ok value ->
+                    let
+                        (updatedModel, newCmd) = Autocomplete.Menu.update (SetPeople value) model.autocomplete
+                    in
+                        ( { model | serverMessage = "", autocomplete = updatedModel }, Cmd.map (\c -> ForSelf (AutoCompleteMsg c)) newCmd)
+                Err error ->
+                    ( { model | serverMessage = "Could not fetch participants" }, Cmd.none )
+
+
+
 
 drawUrl : Model -> String
 drawUrl model =
     "/api/drawn"
+
+participantsUrl : DrawId -> String
+participantsUrl drawId =
+    "/api/participants/" ++ drawId
 
 friendDecoder : Decoder Friend
 friendDecoder =
@@ -73,3 +89,11 @@ decodeLastname =
 capitalize : String -> String
 capitalize str =
     (left 1 >> toUpper) str ++ dropLeft 1 str
+
+participantsDecoder : Decoder (List String)
+participantsDecoder = list string
+
+
+fetchParticipants: DrawId -> Cmd Msg
+fetchParticipants drawId = Http.get { url = (participantsUrl drawId),
+                                      expect = Http.expectJson (\r -> ForSelf (FetchParticipantsResponse r)) participantsDecoder }

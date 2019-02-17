@@ -2,11 +2,10 @@ module Draw.View exposing (..)
 
 import Autocomplete.Menu
 import Draw.Types exposing (InternalMsg(..), Model, Msg(..))
-import Route
 import Html exposing (Html)
-import Html exposing (Html, button, div, h1, header, input, p, span, text)
-import Html.Attributes exposing (class, id, placeholder, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, button, div, h1, header, p, span, text)
+import Html.Attributes exposing (class, id)
+import Html.Events exposing (onClick)
 
 root : Model -> Html Msg
 root model = homeView model
@@ -43,9 +42,7 @@ afterDrawnView model =
 drawnView : Model -> Html Msg
 drawnView model =
     div [ class "pure-u-1-3" ]
-        [ input [ type_ "text", placeholder "Imie" ] []
-        , input [ type_ "text", placeholder "Nazwisko" ] []
-        , Html.map (\a -> ForSelf (AutoCompleteMsg a)) (Autocomplete.Menu.view model.autocomplete)
+        [ Html.map (\a -> ForSelf (AutoCompleteMsg a)) (Autocomplete.Menu.view model.autocomplete)
         , div [ class "button-div" ]
             [ button
                 [ class "pure-button pure-button-primary btn-draw"
