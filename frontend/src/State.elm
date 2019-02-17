@@ -1,4 +1,4 @@
-module State exposing (init, update, subscriptions)
+module State exposing (init, subscriptions, update)
 
 import Browser
 import Browser.Navigation as Nav
@@ -12,23 +12,31 @@ import Url
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
-        newRoute = Route.parseUrl url
-        newCmd = onNewRoute newRoute
+        initModel =
+            { serverMessage = ""
+            , key = key
+            , url = url
+            , route = Route.parseUrl url
+            , create = Create.State.init
+            , drawId = ""
+            , draw = Draw.State.init
+            }
+
+        newRoute =
+            Route.parseUrl url
+
+        ( newModel, newCmd ) =
+            onNewRoute newRoute initModel
     in
-    ( { serverMessage = ""
-      , key = key
-      , url = url
-      , route = Route.parseUrl url
-      , create = Create.State.init
-      , drawId = ""
-      , draw = Draw.State.init
-      }
+    ( newModel
     , newCmd
     )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.map drawTranslator (Draw.State.subscriptions model.draw)
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
@@ -43,42 +51,58 @@ update message model =
 
         UrlChanged url ->
             let
-             newRoute = Route.parseUrl url
-             newCmd = onNewRoute newRoute
+                newRoute =
+                    Route.parseUrl url
+
+                ( newModel, newCmd ) =
+                    onNewRoute newRoute model
             in
-            ( { model | url = url, route = newRoute }
+            ( { newModel | url = url, route = newRoute }
             , newCmd
             )
 
-        CreateDrawMsg internalMsg -> let (updatedModel, cmd) = Create.State.update internalMsg model.create
-            in ({ model | create = updatedModel }, Cmd.map createTranslator cmd)
+        CreateDrawMsg internalMsg ->
+            let
+                ( updatedModel, cmd ) =
+                    Create.State.update internalMsg model.create
+            in
+            ( { model | create = updatedModel }, Cmd.map createTranslator cmd )
 
-        UpdateServerMessage serverMessage -> ({ model | serverMessage = serverMessage }, Cmd.none)
+        UpdateServerMessage serverMessage ->
+            ( { model | serverMessage = serverMessage }, Cmd.none )
 
         OnDrawCreated result ->
-                                case result of
-                                    Ok r ->
-                                        ( { model | drawId = r }, Nav.pushUrl model.key "draw-link" )
+            case result of
+                Ok r ->
+                    ( { model | drawId = r }, Nav.pushUrl model.key "draw-link" )
 
-                                    Err err ->
-                                        ( { model | serverMessage = "Could not create draw" }, Cmd.none )
+                Err err ->
+                    ( { model | serverMessage = "Could not create draw" }, Cmd.none )
 
-        DrawMsg internalMsg -> let (updatedModel, cmd) = Draw.State.update internalMsg model.draw
-                            in ({ model | draw = updatedModel }, Cmd.map drawTranslator cmd)
+        DrawMsg internalMsg ->
+            let
+                ( updatedModel, cmd ) =
+                    Draw.State.update internalMsg model.draw model.drawId
+            in
+            ( { model | draw = updatedModel }, Cmd.map drawTranslator cmd )
 
-        GoToCreateView -> (model, Cmd.none)
+        GoToCreateView ->
+            ( model, Cmd.none )
 
-onNewRoute : Route -> Cmd Msg
-onNewRoute route =
+
+onNewRoute : Route -> Model -> ( Model, Cmd Msg )
+onNewRoute route model =
     case route of
-        Draw drawId -> Cmd.map drawTranslator (Draw.State.fetchParticipants drawId)
+        Draw drawId ->
+            ( { model | drawId = drawId }
+            , Cmd.map drawTranslator (Draw.State.fetchParticipants drawId)
+            )
 
+        NewDraw ->
+            ( model, Cmd.none )
 
-        NewDraw -> Cmd.none
+        NotFoundRoute ->
+            ( model, Cmd.none )
 
-
-        NotFoundRoute -> Cmd.none
-
-
-        DrawLink -> Cmd.none
-
+        DrawLink ->
+            ( model, Cmd.none )

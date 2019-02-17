@@ -1,7 +1,7 @@
 port module Main exposing (main, toJs)
 
 import Browser
-import State exposing (init, update, subscriptions)
+import State exposing (init, subscriptions, update)
 import Types exposing (..)
 import View
 

@@ -12,11 +12,11 @@ use serde_derive::Deserialize;
 use crate::service::create_draw::CreateDraw;
 use crate::service::execute_draw::ExecuteDraw;
 use crate::service::find_drawn::FindDrawn;
+use crate::service::find_participants::FindParticipants;
 use crate::service::DbExecutor;
+use actix_web::Path;
 use log::info;
 use uuid::Uuid;
-use actix_web::Path;
-use crate::service::find_participants::FindParticipants;
 
 pub struct AppState {
     pub db: Addr<DbExecutor>,
@@ -64,15 +64,15 @@ pub fn new_draw(
 }
 
 pub fn find_drawn(
-    (state, find_draw_json): (State<AppState>, Json<FindDrawnJson>),
+    (state, params): (State<AppState>, Path<(Uuid, String)>),
 ) -> FutureResponse<HttpResponse> {
-    let find_drawn = find_draw_json.into_inner();
-    info!("Find drawn: {:?}", find_drawn);
+    let (uuid, participant) = params.into_inner();
+    info!("Find drawn: {:?}, {:?}", uuid, participant);
     state
         .db
         .send(FindDrawn {
-            draw_id: find_drawn.draw_id,
-            participant_id: find_drawn.participant,
+            draw_id: uuid,
+            participant,
         })
         .flatten()
         .map(|drawn_name| HttpResponse::Ok().json(drawn_name))
@@ -80,7 +80,9 @@ pub fn find_drawn(
         .responder()
 }
 
-pub fn find_participants((state, draw_id): (State<AppState>, Path<Uuid>)) -> FutureResponse<HttpResponse> {
+pub fn find_participants(
+    (state, draw_id): (State<AppState>, Path<Uuid>),
+) -> FutureResponse<HttpResponse> {
     info!("Find participants: {:?}", draw_id);
 
     state

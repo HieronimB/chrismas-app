@@ -1,4 +1,4 @@
-module Draw.Types exposing (DrawId, ExternalMsg(..), Focused(..), Friend, InternalMsg(..), Model, Msg(..), TranslationDictionary, Translator, translator)
+module Draw.Types exposing (DrawId, ExternalMsg(..), Focused(..), InternalMsg(..), Model, Msg(..), TranslationDictionary, Translator, translator)
 
 import Autocomplete.Menu
 import Http
@@ -16,7 +16,7 @@ type alias Model =
 
 type InternalMsg
     = Draw
-    | OnServerResponse (Result Http.Error Friend)
+    | OnServerResponse (Result Http.Error String)
     | AutoCompleteMsg Autocomplete.Menu.Msg
     | FetchParticipantsResponse (Result Http.Error (List String))
 
@@ -28,11 +28,6 @@ type ExternalMsg
 type Msg
     = ForSelf InternalMsg
     | ForParent ExternalMsg
-
-
-type alias Friend =
-    { firstname : String, lastname : String }
-
 
 type Focused
     = Simple

@@ -7,7 +7,7 @@ use log::debug;
 use uuid::Uuid;
 
 pub struct FindParticipants {
-    pub draw_id: Uuid
+    pub draw_id: Uuid,
 }
 
 impl Message for FindParticipants {
@@ -20,10 +20,7 @@ impl Handler<FindParticipants> for DbExecutor {
     fn handle(&mut self, msg: FindParticipants, _ctx: &mut Self::Context) -> Self::Result {
         use crate::db::schema::participants;
 
-        debug!(
-            "Executing find participants: {}",
-            msg.draw_id
-        );
+        debug!("Executing find participants: {}", msg.draw_id);
 
         let participants: QueryResult<Vec<String>> = participants::table
             .select(participants::name)
