@@ -6,6 +6,11 @@ type InternalMsg = CreateDraw
                        | AddParticipant String
                        | UpdateParticipant String
                        | UpdateDrawName String
+                       | UpdateExcludedName String
+                       | UpdateParticipantExcludingName String
+                       | AddExcluded (List String)
+                       | RemoveParticipant String
+                       | RemoveExcluded (List String)
 
 type ExternalMsg = DrawFinished (Result Http.Error String)
 
@@ -14,6 +19,8 @@ type Msg = ForSelf InternalMsg | ForParent ExternalMsg
 type alias Model =
     { draw : NewDraw
     , participantName : String
+    , excludedName: String
+    , participantExcludingName: String
     }
 
 type alias NewDraw =

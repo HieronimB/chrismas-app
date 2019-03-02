@@ -1,6 +1,5 @@
 module Autocomplete.Menu exposing (..)
 
-import Browser
 import Browser.Dom as Dom
 import Html
 import Html.Attributes as Attrs

@@ -4,7 +4,6 @@ import Create.Types exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Events exposing (..)
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
@@ -49,6 +48,7 @@ interactivePanel model =
         ]
         [ newDrawName model
         , newParticipantInput model
+        , newExcludedInput model
         , createDrawBtn
         ]
 
@@ -59,12 +59,59 @@ viewPanel model =
         [ height <| fillPortion 1
         , width fill
         ]
-        (participantsList model)
+        [row [ width fill] [participantsList model, excludedList model]]
 
-participantsList : Model -> List (Element Msg)
+participantsList : Model -> Element Msg
 participantsList model =
-    List.map (\p -> el [ height <| fillPortion 1 ] (text p)) model.draw.participants
+    Element.table [ height fill ] {
+        data = model.draw.participants
+        , columns = [
+            {
+                header = Element.text "Participants"
+                , width = fill
+                , view = \p -> row [] [ Element.text p, Input.button
+                                                                    [ Background.color blue
+                                                                    , Font.color white
+                                                                    , Border.color darkBlue
+                                                                    , paddingXY 32 16
+                                                                    , Border.rounded 3
+                                                                    ]
+                                                                    { label = text "Remove"
+                                                                    , onPress = Just <| ForSelf (RemoveParticipant p)
+                                                                    }]
+            }
+        ]
+    }
 
+
+
+excludedList : Model -> Element Msg
+excludedList model =
+    Element.table [ height fill ] {
+        data = model.draw.excluded
+        , columns = [
+            {
+                header = Element.text "Excluded"
+                , width = fill
+                , view = \e -> row [] [ Element.text (makeExcluded e), Input.button
+                                                                            [ Background.color blue
+                                                                            , Font.color white
+                                                                            , Border.color darkBlue
+                                                                            , paddingXY 32 16
+                                                                            , Border.rounded 3
+                                                                            ]
+                                                                            { label = text "Remove"
+                                                                            , onPress = Just <| ForSelf (RemoveExcluded e)
+                                                                            }]
+            }
+        ]
+    }
+
+makeExcluded : List String -> String
+makeExcluded excluded =
+    case excluded of
+        (p::e::xs) -> p ++ " " ++ e
+        _ -> "Error"
 
 newDrawName : Model -> Element Msg
 newDrawName model =
@@ -96,6 +143,34 @@ newParticipantInput model =
             ]
             { label = text "Add Participant"
             , onPress = Just <| ForSelf (AddParticipant model.participantName)
+            }
+        ]
+
+newExcludedInput : Model -> Element Msg
+newExcludedInput model =
+    column [ height <| fillPortion 1 ]
+        [ Input.text []
+            { text = model.participantExcludingName
+            , onChange = \name -> ForSelf (UpdateParticipantExcludingName name)
+            , placeholder = Nothing
+            , label = Input.labelAbove [ Font.size 14, paddingXY 0 5 ] (text "Participant")
+            }
+        ,Input.text []
+            { text = model.excludedName
+            , onChange = \name -> ForSelf (UpdateExcludedName name)
+            , placeholder = Nothing
+            , label = Input.labelAbove [ Font.size 14, paddingXY 0 5 ] (text "Excluded")
+            }
+        , Input.button
+            [ Background.color blue
+            , Font.color white
+            , Border.color darkBlue
+            , paddingXY 32 16
+            , Border.rounded 3
+            , width fill
+            ]
+            { label = text "Add Excluded"
+            , onPress = Just <| ForSelf (AddExcluded [model.participantExcludingName, model.excludedName])
             }
         ]
 
