@@ -29,12 +29,16 @@ update msg model =
             let
                 oldDraw =
                     model.draw
-                newParticipants = participant :: oldDraw.participants
+
+                newParticipants =
+                    participant :: oldDraw.participants
+
                 ( newParticipantUpdatedModel, participantNewCmd ) =
-                                            AutoComp.update (AutoComp.SetPeople newParticipants) model.participantAutocomplete
+                    AutoComp.update (AutoComp.SetPeople newParticipants) model.participantAutocomplete
 
                 ( newExcludedUpdatedModel, excludedNewCmd ) =
-                                            AutoComp.update (AutoComp.SetPeople newParticipants) model.excludedAutocomplete
+                    AutoComp.update (AutoComp.SetPeople newParticipants) model.excludedAutocomplete
+
                 newDraw =
                     { oldDraw | participants = newParticipants, excluded = [ participant, participant ] :: oldDraw.excluded }
             in
@@ -64,21 +68,33 @@ update msg model =
         UpdateParticipantExcludingName newParticipantExcludingName ->
             ( { model | participantExcludingName = newParticipantExcludingName }, Cmd.none )
 
-        AddExcluded newExcluded ->
+        AddExcluded ->
             let
                 oldDraw =
                     model.draw
 
+                participantExcludingPerson =
+                    Maybe.withDefault { name = "" } model.participantAutocomplete.selectedPerson
+
+                excludedPerson =
+                    Maybe.withDefault { name = "" } model.excludedAutocomplete.selectedPerson
+
                 newNew =
-                    { oldDraw | excluded = newExcluded :: oldDraw.excluded }
+                    { oldDraw | excluded = [ participantExcludingPerson.name, excludedPerson.name ] :: oldDraw.excluded }
             in
-            ( { model | draw = newNew, excludedName = "", participantExcludingName = "" }, Cmd.none )
+            ( { model | draw = newNew, participantExcludingName = participantExcludingPerson.name, excludedName = excludedPerson.name }, Cmd.none )
 
         RemoveParticipant participantName ->
             let
-                oldDraw = model.draw
-                newParticipants = List.filter (\p -> p /= participantName) oldDraw.participants
-                newExcluded = List.filter (\e -> not <| List.member participantName e) oldDraw.excluded
+                oldDraw =
+                    model.draw
+
+                newParticipants =
+                    List.filter (\p -> p /= participantName) oldDraw.participants
+
+                newExcluded =
+                    List.filter (\e -> not <| List.member participantName e) oldDraw.excluded
+
                 newNew =
                     { oldDraw | participants = newParticipants, excluded = newExcluded }
             in
@@ -88,9 +104,14 @@ update msg model =
 
         RemoveExcluded excludedToRemove ->
             let
-               oldDraw = model.draw
-               newExcluded = List.filter (\e -> not <| excludedToRemove == e) oldDraw.excluded
-               newNew = { oldDraw | excluded = newExcluded }
+                oldDraw =
+                    model.draw
+
+                newExcluded =
+                    List.filter (\e -> not <| excludedToRemove == e) oldDraw.excluded
+
+                newNew =
+                    { oldDraw | excluded = newExcluded }
             in
             ( { model | draw = newNew, participantName = "" }
             , Cmd.none
@@ -98,36 +119,33 @@ update msg model =
 
         ParticipantAutoCompleteMsg participantAutoMsg ->
             let
-               updatedModel =
-                   { model
-                       | participantAutocomplete =
-                           Tuple.first (AutoComp.update participantAutoMsg model.participantAutocomplete)
-                   }
-
+                updatedModel =
+                    { model
+                        | participantAutocomplete =
+                            Tuple.first (AutoComp.update participantAutoMsg model.participantAutocomplete)
+                    }
             in
             case participantAutoMsg of
+                AutoComp.OnFocus ->
+                    ( { updatedModel | currentFocus = Participant }, Cmd.none )
 
-               AutoComp.OnFocus ->
-                   ( { updatedModel | currentFocus = Participant }, Cmd.none )
-               _ ->
-                   ( updatedModel, Cmd.none )
+                _ ->
+                    ( updatedModel, Cmd.none )
 
         ExcludedAutoCompleteMsg excludedAutoMsg ->
             let
-               updatedModel =
-                   { model
-                       | excludedAutocomplete =
-                           Tuple.first (AutoComp.update excludedAutoMsg model.excludedAutocomplete)
-                   }
-
+                updatedModel =
+                    { model
+                        | excludedAutocomplete =
+                            Tuple.first (AutoComp.update excludedAutoMsg model.excludedAutocomplete)
+                    }
             in
             case excludedAutoMsg of
-               AutoComp.OnFocus ->
-                   ( { updatedModel | currentFocus = Excluded }, Cmd.none )
-               _ ->
+                AutoComp.OnFocus ->
+                    ( { updatedModel | currentFocus = Excluded }, Cmd.none )
 
-                   ( updatedModel, Cmd.none )
-
+                _ ->
+                    ( updatedModel, Cmd.none )
 
 
 createDrawUrl : String

@@ -9,7 +9,7 @@ type InternalMsg = CreateDraw
                        | UpdateDrawName String
                        | UpdateExcludedName String
                        | UpdateParticipantExcludingName String
-                       | AddExcluded (List String)
+                       | AddExcluded
                        | RemoveParticipant String
                        | RemoveExcluded (List String)
                        | ParticipantAutoCompleteMsg Autocomplete.Menu.Msg

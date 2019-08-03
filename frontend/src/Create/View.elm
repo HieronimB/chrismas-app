@@ -60,59 +60,72 @@ viewPanel model =
         [ height <| fillPortion 1
         , width fill
         ]
-        [row [ width fill] [participantsList model, excludedList model]]
+        [ row [ width fill ] [ participantsList model, excludedList model ] ]
+
 
 participantsList : Model -> Element Msg
 participantsList model =
-    Element.table [ height fill ] {
-        data = model.draw.participants
-        , columns = [
-            {
-                header = Element.text "Participants"
-                , width = fill
-                , view = \p -> row [] [ Element.text p, Input.button
-                                                                    [ Background.color blue
-                                                                    , Font.color white
-                                                                    , Border.color darkBlue
-                                                                    , paddingXY 32 16
-                                                                    , Border.rounded 3
-                                                                    ]
-                                                                    { label = text "Remove"
-                                                                    , onPress = Just <| ForSelf (RemoveParticipant p)
-                                                                    }]
-            }
-        ]
-    }
-
+    Element.table [ height fill ]
+        { data = model.draw.participants
+        , columns =
+            [ { header = Element.text "Participants"
+              , width = fill
+              , view =
+                    \p ->
+                        row []
+                            [ Element.text p
+                            , Input.button
+                                [ Background.color blue
+                                , Font.color white
+                                , Border.color darkBlue
+                                , paddingXY 32 16
+                                , Border.rounded 3
+                                ]
+                                { label = text "Remove"
+                                , onPress = Just <| ForSelf (RemoveParticipant p)
+                                }
+                            ]
+              }
+            ]
+        }
 
 
 excludedList : Model -> Element Msg
 excludedList model =
-    Element.table [ height fill ] {
-        data = model.draw.excluded
-        , columns = [
-            {
-                header = Element.text "Excluded"
-                , width = fill
-                , view = \e -> row [] [ Element.text (makeExcluded e), Input.button
-                                                                            [ Background.color blue
-                                                                            , Font.color white
-                                                                            , Border.color darkBlue
-                                                                            , paddingXY 32 16
-                                                                            , Border.rounded 3
-                                                                            ]
-                                                                            { label = text "Remove"
-                                                                            , onPress = Just <| ForSelf (RemoveExcluded e)
-                                                                            }]
-            }
-        ]
-    }
+    Element.table [ height fill ]
+        { data = model.draw.excluded
+        , columns =
+            [ { header = Element.text "Excluded"
+              , width = fill
+              , view =
+                    \e ->
+                        row []
+                            [ Element.text (makeExcluded e)
+                            , Input.button
+                                [ Background.color blue
+                                , Font.color white
+                                , Border.color darkBlue
+                                , paddingXY 32 16
+                                , Border.rounded 3
+                                ]
+                                { label = text "Remove"
+                                , onPress = Just <| ForSelf (RemoveExcluded e)
+                                }
+                            ]
+              }
+            ]
+        }
+
 
 makeExcluded : List String -> String
 makeExcluded excluded =
     case excluded of
-        (p::e::xs) -> p ++ " " ++ e
-        _ -> "Error"
+        p :: e :: xs ->
+            p ++ " " ++ e
+
+        _ ->
+            "Error"
+
 
 newDrawName : Model -> Element Msg
 newDrawName model =
@@ -147,6 +160,7 @@ newParticipantInput model =
             }
         ]
 
+
 newExcludedInput : Model -> Element Msg
 newExcludedInput model =
     column [ height <| fillPortion 1 ]
@@ -161,7 +175,7 @@ newExcludedInput model =
             , width fill
             ]
             { label = text "Add Excluded"
-            , onPress = Just <| ForSelf (AddExcluded [model.participantExcludingName, model.excludedName])
+            , onPress = Just <| ForSelf AddExcluded
             }
         ]
 
