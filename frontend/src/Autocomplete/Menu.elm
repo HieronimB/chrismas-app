@@ -42,6 +42,7 @@ type Msg
     | SelectPersonMouse String
     | PreviewPerson String
     | OnFocus
+    | OnBlur
     | NoOp
     | SetPeople (List String)
 
@@ -190,6 +191,8 @@ update msg model =
                 persons = List.map (\n -> Person n) names
             in
             ({ model | people = persons }, Cmd.none)
+        OnBlur ->
+            ({ model | showMenu = False}, Cmd.none)
 
 
 
@@ -279,6 +282,7 @@ view model =
                     [ Events.onInput SetQuery
                     , Events.onFocus OnFocus
                     , Events.preventDefaultOn "keydown" upDownEscDecoder
+                    , Events.onBlur OnBlur
                     , Attrs.value query
                     , Attrs.id "president-input"
                     , Attrs.class "autocomplete-input"
