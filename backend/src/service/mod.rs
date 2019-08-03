@@ -1,4 +1,4 @@
-use actix;
+use ::actix;
 use actix::prelude::*;
 use diesel::pg::PgConnection;
 

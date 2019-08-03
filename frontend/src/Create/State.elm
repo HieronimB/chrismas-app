@@ -1,5 +1,6 @@
 module Create.State exposing (createDrawUrl, encodeNewDraw, init, update)
 
+import Autocomplete.Menu as AutoComp
 import Create.Types exposing (..)
 import Http
 import Json.Encode as Encode exposing (..)
@@ -10,6 +11,9 @@ init =
     { participantName = ""
     , excludedName = ""
     , participantExcludingName = ""
+    , participantAutocomplete = AutoComp.init
+    , excludedAutocomplete = AutoComp.init
+    , currentFocus = None
     , draw =
         { name = ""
         , participants = []
@@ -25,12 +29,17 @@ update msg model =
             let
                 oldDraw =
                     model.draw
+                newParticipants = participant :: oldDraw.participants
+                ( newParticipantUpdatedModel, participantNewCmd ) =
+                                            AutoComp.update (AutoComp.SetPeople newParticipants) model.participantAutocomplete
 
-                newNew =
-                    { oldDraw | participants = participant :: oldDraw.participants, excluded = [ participant, participant ] :: oldDraw.excluded }
+                ( newExcludedUpdatedModel, excludedNewCmd ) =
+                                            AutoComp.update (AutoComp.SetPeople newParticipants) model.excludedAutocomplete
+                newDraw =
+                    { oldDraw | participants = newParticipants, excluded = [ participant, participant ] :: oldDraw.excluded }
             in
-            ( { model | draw = newNew, participantName = "" }
-            , Cmd.none
+            ( { model | draw = newDraw, participantName = "", participantAutocomplete = newParticipantUpdatedModel, excludedAutocomplete = newExcludedUpdatedModel }
+            , Cmd.batch [ Cmd.map (\c -> ForSelf (ParticipantAutoCompleteMsg c)) participantNewCmd, Cmd.map (\c -> ForSelf (ExcludedAutoCompleteMsg c)) excludedNewCmd ]
             )
 
         CreateDraw ->
@@ -86,6 +95,39 @@ update msg model =
             ( { model | draw = newNew, participantName = "" }
             , Cmd.none
             )
+
+        ParticipantAutoCompleteMsg participantAutoMsg ->
+            let
+               updatedModel =
+                   { model
+                       | participantAutocomplete =
+                           Tuple.first (AutoComp.update participantAutoMsg model.participantAutocomplete)
+                   }
+
+            in
+            case participantAutoMsg of
+
+               AutoComp.OnFocus ->
+                   ( { updatedModel | currentFocus = Participant }, Cmd.none )
+               _ ->
+                   ( updatedModel, Cmd.none )
+
+        ExcludedAutoCompleteMsg excludedAutoMsg ->
+            let
+               updatedModel =
+                   { model
+                       | excludedAutocomplete =
+                           Tuple.first (AutoComp.update excludedAutoMsg model.excludedAutocomplete)
+                   }
+
+            in
+            case excludedAutoMsg of
+               AutoComp.OnFocus ->
+                   ( { updatedModel | currentFocus = Excluded }, Cmd.none )
+               _ ->
+
+                   ( updatedModel, Cmd.none )
+
 
 
 createDrawUrl : String

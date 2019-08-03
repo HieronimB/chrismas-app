@@ -1,5 +1,6 @@
 module Create.Types exposing (..)
 
+import Autocomplete.Menu
 import Http
 
 type InternalMsg = CreateDraw
@@ -11,6 +12,8 @@ type InternalMsg = CreateDraw
                        | AddExcluded (List String)
                        | RemoveParticipant String
                        | RemoveExcluded (List String)
+                       | ParticipantAutoCompleteMsg Autocomplete.Menu.Msg
+                       | ExcludedAutoCompleteMsg Autocomplete.Menu.Msg
 
 type ExternalMsg = DrawFinished (Result Http.Error String)
 
@@ -21,7 +24,16 @@ type alias Model =
     , participantName : String
     , excludedName: String
     , participantExcludingName: String
+    , participantAutocomplete : Autocomplete.Menu.Model
+    , excludedAutocomplete : Autocomplete.Menu.Model
+    , currentFocus : Focused
     }
+
+type Focused
+    = Participant
+    | Excluded
+    | None
+
 
 type alias NewDraw =
     { name : String

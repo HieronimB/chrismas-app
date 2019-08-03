@@ -2,7 +2,7 @@ use crate::draw::backtracking_algorithm::BacktrackingAlgorithm;
 use crate::service::models::*;
 use crate::service::DbExecutor;
 use crate::service::SystemError;
-use actix;
+use ::actix;
 use actix::prelude::*;
 use actix_web::*;
 use diesel::prelude::*;

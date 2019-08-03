@@ -1,5 +1,6 @@
 module Create.View exposing (root)
 
+import Autocomplete.Menu
 import Create.Types exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -149,18 +150,8 @@ newParticipantInput model =
 newExcludedInput : Model -> Element Msg
 newExcludedInput model =
     column [ height <| fillPortion 1 ]
-        [ Input.text []
-            { text = model.participantExcludingName
-            , onChange = \name -> ForSelf (UpdateParticipantExcludingName name)
-            , placeholder = Nothing
-            , label = Input.labelAbove [ Font.size 14, paddingXY 0 5 ] (text "Participant")
-            }
-        ,Input.text []
-            { text = model.excludedName
-            , onChange = \name -> ForSelf (UpdateExcludedName name)
-            , placeholder = Nothing
-            , label = Input.labelAbove [ Font.size 14, paddingXY 0 5 ] (text "Excluded")
-            }
+        [ Element.html <| Html.map (\a -> ForSelf (ParticipantAutoCompleteMsg a)) (Autocomplete.Menu.view model.participantAutocomplete)
+        , Element.html <| Html.map (\a -> ForSelf (ExcludedAutoCompleteMsg a)) (Autocomplete.Menu.view model.excludedAutocomplete)
         , Input.button
             [ Background.color blue
             , Font.color white
