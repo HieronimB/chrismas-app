@@ -35,7 +35,10 @@ init flags url key =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map drawTranslator (Draw.State.subscriptions model.draw)
+    Sub.batch
+        [ Sub.map drawTranslator (Draw.State.subscriptions model.draw)
+        , Sub.map createTranslator (Create.State.subscriptions model.create)
+        ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

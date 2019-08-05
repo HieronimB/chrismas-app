@@ -3,8 +3,8 @@ module Draw.State exposing (drawUrl, fetchParticipants, init, participantsDecode
 import Autocomplete.Menu exposing (Msg(..))
 import Draw.Types exposing (DrawId, Focused(..), InternalMsg(..), Model, Msg(..))
 import Http
-import Json.Decode exposing (Decoder, field, list, map2, string)
-import String exposing (dropLeft, left, toUpper)
+import Json.Decode exposing (Decoder, list, string)
+import String
 
 
 init : Model
@@ -18,7 +18,7 @@ init =
     }
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model -> Sub Draw.Types.Msg
 subscriptions model =
     case model.currentFocus of
         Simple ->

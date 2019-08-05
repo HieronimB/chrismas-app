@@ -22,7 +22,7 @@ root model =
 headerPanel : Element Msg
 headerPanel =
     row
-        [ height <| fillPortion 1
+        [ height <| px 100
         , width fill
         , Background.color <| rgb255 92 99 118
         , Font.color <| rgb255 255 255 255
@@ -33,7 +33,7 @@ headerPanel =
 mainPanel : Model -> Element Msg
 mainPanel model =
     row
-        [ height <| fillPortion 6
+        [ height <| fill
         , width fill
         ]
         [ interactivePanel model
@@ -129,7 +129,7 @@ makeExcluded excluded =
 
 newDrawName : Model -> Element Msg
 newDrawName model =
-    el [ height <| fillPortion 1 ] <|
+    el [ height <| px 100 ] <|
         Input.text []
             { text = model.draw.name
             , onChange = \name -> ForSelf (UpdateDrawName name)
@@ -140,7 +140,7 @@ newDrawName model =
 
 newParticipantInput : Model -> Element Msg
 newParticipantInput model =
-    column [ height <| fillPortion 1 ]
+    column [ height <| px 150 ]
         [ Input.text []
             { text = model.participantName
             , onChange = \name -> ForSelf (UpdateParticipant name)
@@ -163,9 +163,9 @@ newParticipantInput model =
 
 newExcludedInput : Model -> Element Msg
 newExcludedInput model =
-    column [ height <| fillPortion 1 ]
-        [ Element.html <| Html.map (\a -> ForSelf (ParticipantAutoCompleteMsg a)) (Autocomplete.Menu.view model.participantAutocomplete)
-        , Element.html <| Html.map (\a -> ForSelf (ExcludedAutoCompleteMsg a)) (Autocomplete.Menu.view model.excludedAutocomplete)
+    row [ height <| px 500 ]
+        [ el [ alignTop ] <| Element.html <| Html.map (\a -> ForSelf (ParticipantAutoCompleteMsg a)) (Autocomplete.Menu.view model.participantAutocomplete)
+        , el [ alignTop ] <| Element.html <| Html.map (\a -> ForSelf (ExcludedAutoCompleteMsg a)) (Autocomplete.Menu.view model.excludedAutocomplete)
         , Input.button
             [ Background.color blue
             , Font.color white
@@ -173,6 +173,7 @@ newExcludedInput model =
             , paddingXY 32 16
             , Border.rounded 3
             , width fill
+            , alignTop
             ]
             { label = text "Add Excluded"
             , onPress = Just <| ForSelf AddExcluded

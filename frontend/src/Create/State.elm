@@ -1,4 +1,4 @@
-module Create.State exposing (createDrawUrl, encodeNewDraw, init, update)
+module Create.State exposing (createDrawUrl, encodeNewDraw, init, update, subscriptions)
 
 import Autocomplete.Menu as AutoComp
 import Create.Types exposing (..)
@@ -21,6 +21,15 @@ init =
         }
     }
 
+subscriptions : Model -> Sub Create.Types.Msg
+subscriptions model =
+    case model.currentFocus of
+        Participant ->
+            Sub.map (\a -> ForSelf (ParticipantAutoCompleteMsg a)) (AutoComp.subscriptions model.participantAutocomplete)
+        Excluded ->
+            Sub.map (\a -> ForSelf (ExcludedAutoCompleteMsg a)) (AutoComp.subscriptions model.excludedAutocomplete)
+        None ->
+            Sub.none
 
 update : InternalMsg -> Model -> ( Model, Cmd Msg )
 update msg model =
