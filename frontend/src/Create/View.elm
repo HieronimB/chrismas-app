@@ -8,6 +8,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
+import Set
 
 
 root : Model -> Html Msg
@@ -66,7 +67,7 @@ viewPanel model =
 participantsList : Model -> Element Msg
 participantsList model =
     Element.table [ height fill ]
-        { data = List.reverse model.draw.participants
+        { data = Set.toList model.draw.participants
         , columns =
             [ { header = Element.text "Participants"
               , width = fill
@@ -95,7 +96,7 @@ participantsList model =
 excludedList : Model -> Element Msg
 excludedList model =
     Element.table [ height fill ]
-        { data = model.draw.excluded
+        { data = Set.toList model.draw.excluded
         , columns =
             [ { header = Element.text "Excluded"
               , width = fill

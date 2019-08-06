@@ -4,6 +4,7 @@ import Autocomplete.Menu as AutoComp
 import Create.Types exposing (..)
 import Http
 import Json.Encode as Encode exposing (..)
+import Set
 
 
 init : Model
@@ -14,8 +15,8 @@ init =
     , currentFocus = None
     , draw =
         { name = ""
-        , participants = []
-        , excluded = []
+        , participants = Set.empty
+        , excluded = Set.empty
         }
     }
 
@@ -42,16 +43,16 @@ update msg model =
                     model.draw
 
                 newParticipants =
-                    participant :: oldDraw.participants
+                    Set.insert participant oldDraw.participants
 
                 ( newParticipantUpdatedModel, participantNewCmd ) =
-                    AutoComp.update (AutoComp.SetPeople newParticipants) model.participantAutocomplete
+                    AutoComp.update (AutoComp.SetPeople <| Set.toList newParticipants) model.participantAutocomplete
 
                 ( newExcludedUpdatedModel, excludedNewCmd ) =
-                    AutoComp.update (AutoComp.SetPeople newParticipants) model.excludedAutocomplete
+                    AutoComp.update (AutoComp.SetPeople <| Set.toList newParticipants) model.excludedAutocomplete
 
                 newDraw =
-                    { oldDraw | participants = newParticipants, excluded = [ participant, participant ] :: oldDraw.excluded }
+                    { oldDraw | participants = newParticipants, excluded = Set.insert [ participant, participant ] oldDraw.excluded }
             in
             ( { model | draw = newDraw, participantName = "", participantAutocomplete = newParticipantUpdatedModel, excludedAutocomplete = newExcludedUpdatedModel }
             , Cmd.batch [ Cmd.map (\c -> ForSelf (ParticipantAutoCompleteMsg c)) participantNewCmd, Cmd.map (\c -> ForSelf (ExcludedAutoCompleteMsg c)) excludedNewCmd ]
@@ -85,7 +86,7 @@ update msg model =
                     Maybe.withDefault { name = "" } model.excludedAutocomplete.selectedPerson
 
                 newNew =
-                    { oldDraw | excluded = [ participantExcludingPerson.name, excludedPerson.name ] :: oldDraw.excluded }
+                    { oldDraw | excluded = Set.insert [ participantExcludingPerson.name, excludedPerson.name ] oldDraw.excluded }
             in
             ( { model | draw = newNew }, Cmd.none )
 
@@ -95,10 +96,10 @@ update msg model =
                     model.draw
 
                 newParticipants =
-                    List.filter (\p -> p /= participantName) oldDraw.participants
+                    Set.filter (\p -> p /= participantName) oldDraw.participants
 
                 newExcluded =
-                    List.filter (\e -> not <| List.member participantName e) oldDraw.excluded
+                    Set.filter (\e -> not <| List.member participantName e) oldDraw.excluded
 
                 newNew =
                     { oldDraw | participants = newParticipants, excluded = newExcluded }
@@ -113,7 +114,7 @@ update msg model =
                     model.draw
 
                 newExcluded =
-                    List.filter (\e -> not <| excludedToRemove == e) oldDraw.excluded
+                    Set.filter (\e -> not <| excludedToRemove == e) oldDraw.excluded
 
                 newNew =
                     { oldDraw | excluded = newExcluded }
@@ -162,6 +163,6 @@ encodeNewDraw : NewDraw -> Value
 encodeNewDraw newDraw =
     Encode.object
         [ ( "name", Encode.string newDraw.name )
-        , ( "participants", Encode.list Encode.string newDraw.participants )
-        , ( "excluded", Encode.list (Encode.list Encode.string) newDraw.excluded )
+        , ( "participants", Encode.set Encode.string newDraw.participants )
+        , ( "excluded", Encode.set (Encode.list Encode.string) newDraw.excluded )
         ]

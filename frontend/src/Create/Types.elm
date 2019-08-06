@@ -2,6 +2,7 @@ module Create.Types exposing (..)
 
 import Autocomplete.Menu
 import Http
+import Set exposing (Set)
 
 type InternalMsg = CreateDraw
                        | AddParticipant String
@@ -33,8 +34,8 @@ type Focused
 
 type alias NewDraw =
     { name : String
-    , participants : List String
-    , excluded : List (List String)
+    , participants : Set String
+    , excluded : Set (List String)
     }
 
 type alias TranslationDictionary msg =
