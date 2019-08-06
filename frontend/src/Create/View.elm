@@ -66,24 +66,26 @@ viewPanel model =
 participantsList : Model -> Element Msg
 participantsList model =
     Element.table [ height fill ]
-        { data = model.draw.participants
+        { data = List.reverse model.draw.participants
         , columns =
             [ { header = Element.text "Participants"
               , width = fill
               , view =
                     \p ->
                         row []
-                            [ Element.text p
-                            , Input.button
-                                [ Background.color blue
+                            [ Input.button
+                                [ Background.color red
                                 , Font.color white
-                                , Border.color darkBlue
-                                , paddingXY 32 16
+                                , Border.color black
+                                , paddingXY 5 5
                                 , Border.rounded 3
+                                , Border.solid
+                                , Border.width 1
                                 ]
-                                { label = text "Remove"
+                                { label = text "X"
                                 , onPress = Just <| ForSelf (RemoveParticipant p)
                                 }
+                            , Element.text p
                             ]
               }
             ]
@@ -100,17 +102,19 @@ excludedList model =
               , view =
                     \e ->
                         row []
-                            [ Element.text (makeExcluded e)
-                            , Input.button
-                                [ Background.color blue
+                            [ Input.button
+                                [ Background.color red
                                 , Font.color white
-                                , Border.color darkBlue
-                                , paddingXY 32 16
+                                , Border.color black
+                                , paddingXY 5 5
                                 , Border.rounded 3
+                                , Border.solid
+                                , Border.width 1
                                 ]
-                                { label = text "Remove"
+                                { label = text "X"
                                 , onPress = Just <| ForSelf (RemoveExcluded e)
                                 }
+                            , Element.text (makeExcluded e)
                             ]
               }
             ]
@@ -140,7 +144,7 @@ newDrawName model =
 
 newParticipantInput : Model -> Element Msg
 newParticipantInput model =
-    column [ height <| px 150 ]
+    row [ height <| px 150 ]
         [ Input.text []
             { text = model.participantName
             , onChange = \name -> ForSelf (UpdateParticipant name)
@@ -163,7 +167,7 @@ newParticipantInput model =
 
 newExcludedInput : Model -> Element Msg
 newExcludedInput model =
-    row [ height <| px 500 ]
+    row [ height <| px 100 ]
         [ el [ alignTop ] <| Element.html <| Html.map (\a -> ForSelf (ParticipantAutoCompleteMsg a)) (Autocomplete.Menu.view model.participantAutocomplete)
         , el [ alignTop ] <| Element.html <| Html.map (\a -> ForSelf (ExcludedAutoCompleteMsg a)) (Autocomplete.Menu.view model.excludedAutocomplete)
         , Input.button
@@ -207,3 +211,11 @@ white =
 
 blue =
     Element.rgb 0 0 0.8
+
+
+red =
+    Element.rgb 0.8 0.3 0.3
+
+
+black =
+    Element.rgb 0 0 0

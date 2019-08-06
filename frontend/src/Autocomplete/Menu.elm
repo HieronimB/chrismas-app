@@ -1,4 +1,4 @@
-module Autocomplete.Menu exposing (..)
+module Autocomplete.Menu exposing (Model, Msg(..), Person, acceptablePeople, boolToString, getPersonAtId, init, removeSelection, resetInput, resetMenu, setQuery, subscriptions, update, updateConfig, view, viewConfig, viewMenu)
 
 import Browser.Dom as Dom
 import Html
@@ -9,9 +9,11 @@ import Menu
 import String
 import Task
 
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.map SetAutoState Menu.subscription
+
 
 init : Model
 init =
@@ -23,6 +25,7 @@ init =
     , showMenu = False
     }
 
+
 type alias Model =
     { people : List Person
     , autoState : Menu.State
@@ -31,6 +34,7 @@ type alias Model =
     , selectedPerson : Maybe Person
     , showMenu : Bool
     }
+
 
 type Msg
     = SetQuery String
@@ -188,12 +192,13 @@ update msg model =
 
         SetPeople names ->
             let
-                persons = List.map (\n -> Person n) names
+                persons =
+                    List.map (\n -> Person n) names
             in
-            ({ model | people = persons }, Cmd.none)
-        OnBlur ->
-            ({ model | showMenu = False}, Cmd.none)
+            ( { model | people = persons }, Cmd.none )
 
+        OnBlur ->
+            ( resetMenu model, Cmd.none )
 
 
 resetInput model =
@@ -331,6 +336,9 @@ updateConfig =
 
                 else if code == 13 then
                     Maybe.map SelectPersonKeyboard maybeId
+
+                else if code == 9 then
+                    Just NoOp
 
                 else
                     Just Reset
