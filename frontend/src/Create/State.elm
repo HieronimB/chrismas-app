@@ -9,7 +9,11 @@ import Set
 
 init : Model
 init =
-    { participantName = ""
+    { participant =
+        { name = ""
+        , valid = True
+        , message = ""
+        }
     , participantAutocomplete = AutoComp.init
     , excludedAutocomplete = AutoComp.init
     , currentFocus = None
@@ -42,6 +46,9 @@ update msg model =
                 oldDraw =
                     model.draw
 
+                oldParticipant =
+                    model.participant
+
                 newParticipants =
                     Set.insert participant oldDraw.participants
 
@@ -53,8 +60,11 @@ update msg model =
 
                 newDraw =
                     { oldDraw | participants = newParticipants, excluded = Set.insert [ participant, participant ] oldDraw.excluded }
+
+                newParticipant =
+                    { oldParticipant | name = "" }
             in
-            ( { model | draw = newDraw, participantName = "", participantAutocomplete = newParticipantUpdatedModel, excludedAutocomplete = newExcludedUpdatedModel }
+            ( { model | draw = newDraw, participant = newParticipant, participantAutocomplete = newParticipantUpdatedModel, excludedAutocomplete = newExcludedUpdatedModel }
             , Cmd.batch [ Cmd.map (\c -> ForSelf (ParticipantAutoCompleteMsg c)) participantNewCmd, Cmd.map (\c -> ForSelf (ExcludedAutoCompleteMsg c)) excludedNewCmd ]
             )
 
@@ -62,7 +72,14 @@ update msg model =
             ( model, Http.post { url = createDrawUrl, body = Http.jsonBody (encodeNewDraw model.draw), expect = Http.expectString (\r -> ForParent (DrawFinished r)) } )
 
         UpdateParticipant participant ->
-            ( { model | participantName = participant }, Cmd.none )
+            let
+                oldParticipant =
+                    model.participant
+
+                newParticipant =
+                    { oldParticipant | name = participant }
+            in
+            ( { model | participant = newParticipant }, Cmd.none )
 
         UpdateDrawName drawName ->
             let
@@ -104,7 +121,7 @@ update msg model =
                 newNew =
                     { oldDraw | participants = newParticipants, excluded = newExcluded }
             in
-            ( { model | draw = newNew, participantName = "" }
+            ( { model | draw = newNew }
             , Cmd.none
             )
 
@@ -119,7 +136,7 @@ update msg model =
                 newNew =
                     { oldDraw | excluded = newExcluded }
             in
-            ( { model | draw = newNew, participantName = "" }
+            ( { model | draw = newNew }
             , Cmd.none
             )
 

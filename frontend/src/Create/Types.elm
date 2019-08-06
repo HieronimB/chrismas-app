@@ -20,7 +20,7 @@ type Msg = ForSelf InternalMsg | ForParent ExternalMsg
 
 type alias Model =
     { draw : NewDraw
-    , participantName : String
+    , participant : NewParticipantInput
     , participantAutocomplete : Autocomplete.Menu.Model
     , excludedAutocomplete : Autocomplete.Menu.Model
     , currentFocus : Focused
@@ -36,6 +36,12 @@ type alias NewDraw =
     { name : String
     , participants : Set String
     , excluded : Set (List String)
+    }
+
+type alias NewParticipantInput = {
+        name: String,
+        valid: Bool,
+        message: String
     }
 
 type alias TranslationDictionary msg =

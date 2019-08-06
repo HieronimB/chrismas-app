@@ -147,7 +147,7 @@ newParticipantInput : Model -> Element Msg
 newParticipantInput model =
     row [ height <| px 150 ]
         [ Input.text []
-            { text = model.participantName
+            { text = model.participant.name
             , onChange = \name -> ForSelf (UpdateParticipant name)
             , placeholder = Nothing
             , label = Input.labelAbove [ Font.size 14, paddingXY 0 5 ] (text "Participant")
@@ -161,7 +161,7 @@ newParticipantInput model =
             , width fill
             ]
             { label = text "Add Participant"
-            , onPress = Just <| ForSelf (AddParticipant model.participantName)
+            , onPress = Just <| ForSelf (AddParticipant model.participant.name)
             }
         ]
 
