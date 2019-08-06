@@ -7,8 +7,6 @@ type InternalMsg = CreateDraw
                        | AddParticipant String
                        | UpdateParticipant String
                        | UpdateDrawName String
-                       | UpdateExcludedName String
-                       | UpdateParticipantExcludingName String
                        | AddExcluded
                        | RemoveParticipant String
                        | RemoveExcluded (List String)
@@ -22,8 +20,6 @@ type Msg = ForSelf InternalMsg | ForParent ExternalMsg
 type alias Model =
     { draw : NewDraw
     , participantName : String
-    , excludedName: String
-    , participantExcludingName: String
     , participantAutocomplete : Autocomplete.Menu.Model
     , excludedAutocomplete : Autocomplete.Menu.Model
     , currentFocus : Focused

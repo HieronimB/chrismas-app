@@ -1,4 +1,4 @@
-module Create.State exposing (createDrawUrl, encodeNewDraw, init, update, subscriptions)
+module Create.State exposing (createDrawUrl, encodeNewDraw, init, subscriptions, update)
 
 import Autocomplete.Menu as AutoComp
 import Create.Types exposing (..)
@@ -9,8 +9,6 @@ import Json.Encode as Encode exposing (..)
 init : Model
 init =
     { participantName = ""
-    , excludedName = ""
-    , participantExcludingName = ""
     , participantAutocomplete = AutoComp.init
     , excludedAutocomplete = AutoComp.init
     , currentFocus = None
@@ -21,15 +19,19 @@ init =
         }
     }
 
+
 subscriptions : Model -> Sub Create.Types.Msg
 subscriptions model =
     case model.currentFocus of
         Participant ->
             Sub.map (\a -> ForSelf (ParticipantAutoCompleteMsg a)) (AutoComp.subscriptions model.participantAutocomplete)
+
         Excluded ->
             Sub.map (\a -> ForSelf (ExcludedAutoCompleteMsg a)) (AutoComp.subscriptions model.excludedAutocomplete)
+
         None ->
             Sub.none
+
 
 update : InternalMsg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -71,12 +73,6 @@ update msg model =
             in
             ( { model | draw = newDraw }, Cmd.none )
 
-        UpdateExcludedName newExcludedName ->
-            ( { model | excludedName = newExcludedName }, Cmd.none )
-
-        UpdateParticipantExcludingName newParticipantExcludingName ->
-            ( { model | participantExcludingName = newParticipantExcludingName }, Cmd.none )
-
         AddExcluded ->
             let
                 oldDraw =
@@ -91,7 +87,7 @@ update msg model =
                 newNew =
                     { oldDraw | excluded = [ participantExcludingPerson.name, excludedPerson.name ] :: oldDraw.excluded }
             in
-            ( { model | draw = newNew, participantExcludingName = participantExcludingPerson.name, excludedName = excludedPerson.name }, Cmd.none )
+            ( { model | draw = newNew }, Cmd.none )
 
         RemoveParticipant participantName ->
             let
