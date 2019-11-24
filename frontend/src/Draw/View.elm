@@ -17,7 +17,7 @@ homeView model =
         , header []
             [ -- img [ src "/images/logo.gif" ] []
               span [ class "logo" ] []
-            , h1 [ class "title" ] [ text "Losowanie prezentów - Wigilia 2018" ]
+            , h1 [ class "title" ] [ text "Losowanie prezentów - Wigilia 2019" ]
             ]
         , p [ class "description" ] [ text "Wpisz swoje imie i nazwisko a następnie kiknij 'Losuj', aby wylosować osobę, którą uszczęśliwisz prezetem :)" ]
         , div [ class "pure-g" ]
